@@ -7,8 +7,7 @@ namespace CoinBill
     {
     public:
 
-        unsigned int getNumConnections() const;
-        unsigned int getNumManagedThreads() const;
+        unsigned int getNumNodes() const;
     private:
     };
 }
