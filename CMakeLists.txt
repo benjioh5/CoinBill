@@ -49,5 +49,5 @@ add_subdirectory(${COINBILL_LIB_DIR}/Support/)
 
 
 # Now compile it.
-AddCoinbill_Exe(Exec ${COINBILL_LIB_DIR}/CoinBill.cpp)
-target_link_libraries(Exec Network Support ${COINBILL_TARGET_LIBRARIES})
+AddCoinbill_Exe(CoinBillExec ${COINBILL_LIB_DIR}/CoinBill.cpp)
+target_link_libraries(CoinBillExec CoinBillNetwork CoinBillSupport ${COINBILL_TARGET_LIBRARIES})
