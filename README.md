@@ -20,16 +20,6 @@ It provides a platform for derivative products to existing coins and newly issue
 Now entering timing
 The size of the global crypto-currency market is nearly $180 billion. The CoinBill team is convinced that the size of the market has grown enough to trade the derivative products.
 
-## About Team
-IN WOO JUNG PM
-He, who is a college student, has been investing in block chains and crypto-currency and monitoring various projects since 2013, and he started his CoinBill project in 2017 with his current team.
-HYO KEUN OH Developer
-He received training on information security at the 4th Best of the Best and analyzed remote control-related vulnerabilities in home IoT products and then made a presentation about it on the engine. Moreover, he contributed a paper to the Fall Conference of Korea Institute of Communication Science. In addition, he has been participated in numerous Hackathon and as a result won the UTC Technology Innovation Award and the Small and Medium Business Administration Award for the 1st Super Challenge Hackathon. https://github.com/benjioh5
-JUN RYOUNG JU Developer 
-He has participated in various open source developments such as LLVM, CoreCLR, etc. and is currently working with the Software Foundation Laboratory (SFL) at Seoul National University. https://github.com/artblnd
-HO JOON YI Designer
-He is responsible for the internal operation and design of Coinbill based on the lean start-up methodology. And, he completed the 4th lean start-up lecture conducted in Korea, which was the same as Stanford’s lean start-up lecture, and has been an advisor and representative for a number of start-up teams over the past three years.
-
 ## Contact us
 Based on the joint TF announcement by the Korea Financial Services Commission with crypto currency related institutes on September 29, 2017, we decided that it would be difficult for the Korean corporation and foundation to proceed smoothly with ICO.
 Therefore, we are seeking fund investors to proceed with ICO by establishing a corporation in other countries. Interviews are also underway to understand customers, so please feel free to contact us. Thank you.
