@@ -27,11 +27,13 @@ namespace CoinBill
     public:
         Host* getParent() const;
         SOCKET_HANDLE getNativeHandle() const;
+        SOCKET_TYPE getNativeType() const;
 
     private:
         Host*           m_Host;
+
         SOCKET_HANDLE   m_SockHandle;
-        SOCK_TYPE       m_SockType;
+        SOCKET_TYPE     m_SockType;
     };
 }
 

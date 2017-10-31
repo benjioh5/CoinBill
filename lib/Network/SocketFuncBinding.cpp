@@ -19,11 +19,11 @@ namespace CoinBill
         {
 
         }
-        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCK_TYPE Type)
+        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type)
         {
 
         }
-        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCK_TYPE Type)
+        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type)
         {
 
         }

@@ -21,4 +21,8 @@ namespace CoinBill
     {
         return m_SockHandle;
     }
+    SOCKET_TYPE Socket::getNativeType() const
+    {
+        return m_SockType;
+    }
 }

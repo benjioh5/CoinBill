@@ -13,8 +13,8 @@ namespace CoinBill
         bool InitSocket();
         bool StopSocket();
         
-        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCK_TYPE Type);
-        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCK_TYPE Type);
+        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type);
+        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type);
 
         bool SocketClose(const SOCKET_HANDLE Handle);
         bool SocketDisconnect(const SOCKET_HANDLE Handle);

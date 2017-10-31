@@ -3,7 +3,7 @@
 
 namespace CoinBill
 {
-    enum SOCK_TYPE {
+    enum SOCKET_TYPE {
         Stream, DGRAM, Raw
     };
 }

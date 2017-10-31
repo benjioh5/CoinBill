@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __CLUSK_SUPPORT_ALGORITHM_H__
-#define __CLUSK_SUPPORT_ALGORITHM_H__
+#ifndef COINBILL_SUPPORT_ALGORITHM
+#define COINBILL_SUPPORT_ALGORITHM
 
 namespace CoinBill
 {
