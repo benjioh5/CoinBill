@@ -1,3 +1,5 @@
 AddCoinbill_Lib(Support
-    Hash.cpp
+    Cryption.cpp
+
+    ${COINBILL_INC_DIR}/Support/Cryption.h
 )
