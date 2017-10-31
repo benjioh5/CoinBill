@@ -46,3 +46,8 @@ endif()
 # Add and initialize subdirectories.
 add_subdirectory(${COINBILL_LIB_DIR}/Network/)
 add_subdirectory(${COINBILL_LIB_DIR}/Support/)
+
+
+# Now compile it.
+add_executable(CoinBillExec ${COINBILL_LIB_DIR}/CoinBill.cpp)
+target_link_libraries(CoinBillExec Network Support ${COINBILL_TARGET_LIBRARIES})
