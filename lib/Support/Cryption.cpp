@@ -1,103 +1,162 @@
 #include <Support/Cryption.h>
 
-#include <openssl/sha.h>
-#include <openssl/rsa.h>
-#include <openssl/rand.h>
-#include <openssl/crypto.h>
-#include <openssl/engine.h>
+#include <memory>
 
-void CoinBill::InitAlgorithm()
+// Basic OpenSSL Headers.
+#include <openssl/conf.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+
+#define IF_FAILED(x, y) if(!x) return y; 
+
+namespace CoinBill
 {
-    OpenSSL_add_all_ciphers();
-    OpenSSL_add_all_digests();
-}
+    void InitCryption() {
+        ERR_load_crypto_strings();
+        OpenSSL_add_all_algorithms();
+    }
+    void StopCryption() {
+        EVP_cleanup();
+        CRYPTO_cleanup_all_ex_data();
+        ERR_free_strings();
+    }
 
-bool CoinBill::HashBuffer(Buffer buffer, size_t size, HashRef Hash)
-{
-    CoinBill::Hash tmpBuf;
-    SHA256_CTX  sha256;
+    template <class Type>
+    inline void* offset(Type* value, size_t index) {
+        return (void*)((size_t)(value) - index)
+    }
 
-    // Initialize and hash buffer.
-    SHA256_Init     (&sha256);
-    SHA256_Update   (&sha256, buffer, size);
-    SHA256_Final    (tmpBuf.UINT_1, &sha256);
+    // TODO : Use SIMD instructions for faster checks.
+    template <class Type, unsigned int cycle>
+    inline bool iterate_check(void *RHS, void *LHS) {
+        for (unsigned int i = 0; i < cycle; ++i)
+            if ((Type*)RHS[i] != (Type*)LHS[i]) return false;
+        return true;
+    }
+    template <class Type>
+    inline bool iterate_check(void *RHS, void *LHS, unsigned int cycle) {
+        for (unsigned int i = 0; i < cycle; ++i)
+            if ((Type*)RHS[i] != (Type*)LHS[i]) return false;
+        return true;
+    }
+    bool Cryption::isSHA256HashEqual(void* pRHS, void* pLHS) {
+        return iterate_check<uint64_t, 4>(pRHS, pLHS);
+    }
+    bool Cryption::isSHA512HashEqual(void* pRHS, void* pLHS) {
+        return iterate_check<uint64_t, 8>(pRHS, pLHS);
+    }
 
-    Hash = tmpBuf;
+    template <unsigned int roundV>
+    inline size_t round_up(size_t size) {
+        size_t rounded = 0;
+        while (rounded = > size)
+            rounded += roundV;
+        return rounded;
+    }
+    
+    // TODO : this buffers to managed buffer for faster allocation speed.
+    void * Cryption::get256AlignedBuffer(size_t szBuf) {
+        return operator new(round_up<256>(szBuf));
+    }
+    void * Cryption::get512AlignedBuffer(size_t szBuf) {
+        return operator new(round_up<512>(szBuf));
+    }
+    bool Cryption::Dispose256AlignedBuffer(void* pBuf, size_t szBuf) {
+        delete pBuf;
+        return true;
+    }
+    bool Cryption::Dispose512AlignedBuffer(void* pBuf, size_t szBuf) {
+        delete pBuf;
+        return true;
+    }
 
-    return true;
-}
+    // SHA Hasing Method Implements.
+    SHA_REASON Cryption::getSHA256Hash(void* pOut, void* pIn, size_t szIn) {
+        SHA256_CTX sha256;
+        // Hash creation.
+        IF_FAILED(SHA256_Init(&sha256)                          , SHA_REASON::FAILED_INIT  );
+        IF_FAILED(SHA256_Update(&sha256, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
+        IF_FAILED(SHA256_Final((unsigned char*)pOut, &sha256)   , SHA_REASON::FAILED_UPDATE);
+        return SHA_REASON::SUCCESSED;
+    }
+    SHA_REASON Cryption::getSHA512Hash(void* pOut, void* pIn, size_t szIn) {
+        SHA512_CTX sha512;
+        // Hash creation.
+        IF_FAILED(SHA512_Init(&sha512)                          , SHA_REASON::FAILED_INIT  );
+        IF_FAILED(SHA512_Update(&sha512, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
+        IF_FAILED(SHA512_Final((unsigned char*)pOut, &sha512)   , SHA_REASON::FAILED_UPDATE);
+        return SHA_REASON::SUCCESSED;
+    }
+    
+    RSA_REASON Cryption::getRSASignature(void* pOut, void* pIn, size_t szIn, RSA* pPrivate) {
+        // Encrypting pIn(Signature)
+        IF_FAILED( RSA_private_encrypt(
+            szIn,                   // Signature Size.
+            (unsigned char*)pIn,    // Signature Buffer.
+            (unsigned char*)pOut,   // Output.
+            pPrivate,               // Signature Key.
+            RSA_PKCS1_PADDING       // Signature Padding.
+        ), RSA_REASON::FAILED_ENCRYPT);
 
-bool CoinBill::HashEqual(HashConstRef Hash_1, HashConstRef Hash_2)
-{
-    for(unsigned int index = 8; index < 8; ++index)
-    {
-        if(Hash_1.UINT_4[index] == Hash_2.UINT_4[index])
-        {
-            continue;
+        return RSA_REASON::SUCCESSED;
+    }
+
+    // RSA Signature Check Implements.
+    RSA_REASON Cryption::isRSASignatureValid(void* pRaw, void* pSig, size_t szSig, RSA* pPublic) {
+        unsigned int RoundIndex = 0;
+
+        // Checking that this is a 256 byte rounded signiture.
+        if ((szSig % 256) == 0) {
+            RoundIndex = szSig / 256;
         }
-        return false;
+
+        // We can exit everywhere that has IF_FAILED, so we need to delete pDecrypted safely.
+        void* pDecrypted = operator new(szSig); std::unique_ptr<void> MemSafety(pDecrypted);
+
+        // try decrypting signature.
+        IF_FAILED( RSA_public_decrypt(
+            szSig,                      // Signature Size.
+            (unsigned char*)pSig,       // Signature Buffer.
+            (unsigned char*)pDecrypted, // Output.
+            pPublic,                    // Signature Key.
+            RSA_PKCS1_PADDING           // Signature Padding.
+        ), RSA_REASON::FAILED_DECRYPT);
+
+        // We need to check it rounded, because we are usally goind to use rounded signature.
+        switch (RoundIndex) {
+        case 0: 
+            // This mean not rounded.
+            break;
+        case 1: 
+            IF_FAILED(isSHA256HashEqual(pSig, pDecrypted), RSA_REASON::NOT_VALID); 
+            break;
+        case 2: 
+            IF_FAILED(isSHA512HashEqual(pSig, pDecrypted), RSA_REASON::NOT_VALID); 
+            break;
+        default: 
+            IF_FAILED(iterate_check<uint64_t>(pSig, pDecrypted, RoundIndex * (256 / sizeof(uint64_t))), RSA_REASON::NOT_VALID); 
+            break;
+        }
+
+        // Now we need to check it very slowly.
+        unsigned int szTip  = szSig % sizeof(uint64_t);
+        unsigned int szBody = szSig / sizeof(uint64_t);
+
+
+        // Now we are going to check the body first, and after tip of signature.
+        IF_FAILED(iterate_check<uint64_t>(pSig, pDecrypted, szBody), RSA_REASON::NOT_VALID);
+        IF_FAILED(
+            iterate_check<uint8_t >(
+                offset(pSig        ,(szSig - szTip)),
+                offset(pDecrypted  ,(szSig - szTip)), 
+                szTip), 
+            RSA_REASON::NOT_VALID);
+            
+
+        // If there is no problem, this is valid signature.
+        return RSA_REASON::SUCCESSED;
     }
-    return true;
-}
 
-bool CoinBill::CreateKeyRSA(KeyRef PublicKey, KeyRef PrivateKey)
-{
-    RSA* Key = nullptr;
-
-    // Start creating new seed before creating key.
-    RAND_screen();
-
-    // Creating new key.
-    Key = RSA_new();
-    Key = RSA_generate_key(32 * 8, RSA_F4, nullptr, nullptr);
-
-    // Check is this key valied, also safe.
-    if(!!RSA_check_key(Key) != true)
-    {
-        return false;
-    }
-
-    // Export to RSAKey buffer.
-    i2d_RSAPublicKey(Key, (unsigned char**)&PublicKey.UINT_1);
-    i2d_RSAPrivateKey(Key, (unsigned char**)&PrivateKey.UINT_1);
-
-    // Freeing allocated RSA object.
-    RSA_free(Key);
-    return true;
-}
-
-bool CoinBill::EncryptRSA(Buffer base, Buffer out, size_t size, KeyConstRef PublicKey)
-{
-    // Create object from RSAKey.
-    RSA* Key = d2i_RSAPublicKey(nullptr, (const unsigned char**)PublicKey.UINT_1, 8 * 32);
-
-    bool successed = !!RSA_public_encrypt(
-        size,               // Size of base buffer.
-        base,               // buffer that going to encrypt.
-        out,                // buffer that encrypted.
-        Key,                // Key to encrypt.
-        RSA_PKCS1_PADDING   // Padding type, RSA_PKCS1_PADDING is very common, and safe padding type to use.
-    );
-
-    // Freeing early allocated object.
-    RSA_free(Key);
-    return successed;
-}
-
-bool CoinBill::DecryptRSA(Buffer base, Buffer out, size_t size, KeyConstRef Privatekey)
-{
-    // Create object from RSAKey.
-    RSA* Key = d2i_RSAPrivateKey(nullptr, (const unsigned char**)Privatekey.UINT_1,(long) 8 * 32);
-
-    bool successed = !!RSA_private_decrypt(
-        size,               // Size of base buffer.
-        base,               // buffer that going to decrypt.
-        out,                // buffer that decrypted.
-        Key,                // Key to decrypted. it always have to be private key.
-        RSA_PKCS1_PADDING   // Padding type, RSA_PKCS1_PADDING is very common, and safe padding type to use.
-    );
-
-    // Freeing early allocated object.
-    RSA_free(Key);
-    return successed;
+    Cryption::Cryption() { }
+    Cryption::~Cryption() { }
 }

@@ -3,44 +3,53 @@
 #ifndef COINBILL_SUPPORT_ALGORITHM
 #define COINBILL_SUPPORT_ALGORITHM
 
+// SHA / RSA Headers.
+#include <openssl/sha.h>
+#include <openssl/rsa.h>
+
+#include <vector>
+
 namespace CoinBill
 {
-    typedef struct __CRYPTO_BASE
+    void InitCryption();
+    void StopCryption();
+
+    enum SHA_REASON {
+        SUCCESSED, FAILED_INIT, FAILED_UPDATE, FAILED_FINAL
+    };
+
+    enum RSA_REASON {
+        SUCCESSED, NOT_VALID, KEY_INVALID, FAILED_DECRYPT, FAILED_ENCRYPT
+    };
+
+    class Cryption final
     {
-        union
-        {
-            unsigned char       UINT_1[32];
-            unsigned short      UINT_2[16];
-            unsigned int        UINT_4[8];
-            unsigned long long  UINT_8[4];
-        };
-    } CryptionBase, Hash, Key;
+        friend class Signature;
 
-    typedef Key                     RSAKey;
-    typedef Key                     AESKey;
+    protected:
+        // Low Level Binding Methods.
+        void* get256AlignedBuffer(size_t szBuf);
+        void* get512AlignedBuffer(size_t szBuf);
+        SHA_REASON getSHA256Hash(void* pOut, void* pIn, size_t szIn);
+        SHA_REASON getSHA512Hash(void* pOut, void* pIn, size_t szIn);
+        RSA_REASON getRSASignature(void* pOut, void* pIn, size_t szIn, RSA* pPrivate);
+        RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, size_t szSig, RSA* pPublic);
+        bool isSHA256HashEqual(void* pRHS, void *LHS);
+        bool isSHA512HashEqual(void* pRHS, void *LHS);
+        bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
+        bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
 
-    typedef unsigned char*          Buffer;
+    public:
+        Cryption();
+        ~Cryption();
+    };
 
-    typedef const Hash&             HashConstRef;
-    typedef Hash&                   HashRef;
-    typedef const Key&              KeyConstRef;
-    typedef Key&                    KeyRef;
+    class Signature {
+        Cryption *m_pParent;
 
-    // This will initialize algorthms, create algorithm bindings.
-    void InitAlgorithm();
-    
-    // Check is hash equal.
-    bool HashEqual(HashConstRef Hash_1, HashConstRef Hash_2);
-    // Create hash with buffer.
-    bool HashBuffer(Buffer buffer, size_t size, HashRef Hash);
-    
-    // Creating New Available RSA Key.
-    bool CreateKeyRSA(KeyRef Public, KeyRef Privite);
-    // Encrypt buffer with RSA Key.
-    bool EncryptRSA(Buffer buffer_in, Buffer buffer_out, size_t size, KeyConstRef Key);
-    // Decrpyt buffer with RSA Key.
-    bool DecryptRSA(Buffer buffer_in, Buffer buffer_out, size_t size, KeyConstRef Key);
+        void* m_pSignature;
+        size_t m_szSignature;
+    };
 };
-
 
 #endif
