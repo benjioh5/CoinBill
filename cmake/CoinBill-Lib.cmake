@@ -2,7 +2,7 @@ macro(AddCoinbill_Lib Libname)
     include_directories(${COINBILL_TARGET_INCLUDE_DIRS} ${COINBILL_INC_DIR})
     add_definitions(${COINBILL_TARGET_DEFINES})
     link_directories(${COINBILL_TARGET_LIBRARY_DIRS})
-    add_library(${Libname} SHARED ${ARGN})
+    add_library(${Libname} STATIC ${ARGN})
     target_link_libraries(${Libname} ${COINBILL_TARGET_LIBRARIES})
 endmacro()
 

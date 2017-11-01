@@ -1,13 +1,13 @@
-#include <Support/Cryption.h>
-
 #include <memory>
+
+#include <Support/Basic.h>
+#include <Support/Cryption.h>
 
 // Basic OpenSSL Headers.
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-#define IF_FAILED(x, y) if(!x) return y; 
 
 namespace CoinBill
 {
@@ -21,37 +21,11 @@ namespace CoinBill
         ERR_free_strings();
     }
 
-    template <class Type>
-    inline void* offset(Type* value, size_t index) {
-        return (void*)((size_t)(value) - index)
-    }
-
-    // TODO : Use SIMD instructions for faster checks.
-    template <class Type, unsigned int cycle>
-    inline bool iterate_check(void *RHS, void *LHS) {
-        for (unsigned int i = 0; i < cycle; ++i)
-            if ((Type*)RHS[i] != (Type*)LHS[i]) return false;
-        return true;
-    }
-    template <class Type>
-    inline bool iterate_check(void *RHS, void *LHS, unsigned int cycle) {
-        for (unsigned int i = 0; i < cycle; ++i)
-            if ((Type*)RHS[i] != (Type*)LHS[i]) return false;
-        return true;
-    }
     bool Cryption::isSHA256HashEqual(void* pRHS, void* pLHS) {
         return iterate_check<uint64_t, 4>(pRHS, pLHS);
     }
     bool Cryption::isSHA512HashEqual(void* pRHS, void* pLHS) {
         return iterate_check<uint64_t, 8>(pRHS, pLHS);
-    }
-
-    template <unsigned int roundV>
-    inline size_t round_up(size_t size) {
-        size_t rounded = 0;
-        while (rounded = > size)
-            rounded += roundV;
-        return rounded;
     }
     
     // TODO : this buffers to managed buffer for faster allocation speed.
@@ -111,7 +85,7 @@ namespace CoinBill
         }
 
         // We can exit everywhere that has IF_FAILED, so we need to delete pDecrypted safely.
-        void* pDecrypted = operator new(szSig); std::unique_ptr<void> MemSafety(pDecrypted);
+        char* pDecrypted = new char[szSig]; std::unique_ptr<char> MemSafety((char*)pDecrypted);
 
         // try decrypting signature.
         IF_FAILED( RSA_public_decrypt(

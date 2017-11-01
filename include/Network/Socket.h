@@ -7,7 +7,7 @@ namespace CoinBill
 {
     using namespace SocketBinding;
 
-    class Host;
+    class NetHost;
     class Socket
     {
         // Basic socket binding methods.
@@ -25,12 +25,12 @@ namespace CoinBill
         }
 
     public:
-        Host* getParent() const;
+        NetHost* getParent() const;
         SOCKET_HANDLE getNativeHandle() const;
         SOCKET_TYPE getNativeType() const;
 
     private:
-        Host*           m_Host;
+        NetHost*        m_Host;
 
         SOCKET_HANDLE   m_SockHandle;
         SOCKET_TYPE     m_SockType;

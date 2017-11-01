@@ -11,49 +11,42 @@ namespace CoinBill
 {
     namespace SocketBinding
     {
-        bool InitSocket()
-        {
-
+        bool InitSocket() {
+            return true;
         }
-        bool StopSocket()
-        {
-
+        bool StopSocket() {
+            return true;
         }
-        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type)
-        {
 
+        bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type) {
+            return true;
         }
-        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type)
-        {
-
+        bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type) {
+            return true;
         }
-        bool SocketClose(const SOCKET_HANDLE Handle)
-        {
 
+        bool SocketClose(const SOCKET_HANDLE Handle) {
+            return true;
         }
-        bool SocketDisconnect(const SOCKET_HANDLE Handle)
-        {
-
+        bool SocketDisconnect(const SOCKET_HANDLE Handle) {
+            return true;
         }
-        bool SocketBind(const SOCKET_HANDLE Handle, const std::string& Address, short Port)
-        {
 
+        bool SocketBind(const SOCKET_HANDLE Handle, const std::string& Address, short Port) {
+            return true;
         }
-        bool SocketListen(const SOCKET_HANDLE Handle)
-        {
-
+        bool SocketListen(const SOCKET_HANDLE Handle) {
+            return true;
         }
-        bool SocketAccept(const SOCKET_HANDLE Handle, SOCKET_HANDLE& Accepted)
-        {
-
+        bool SocketAccept(const SOCKET_HANDLE Handle, SOCKET_HANDLE& Accepted) {
+            return true;
         }
-        size_t SocketSend(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf)
-        {
 
+        size_t SocketSend(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf) {
+            return 0;
         }
-        size_t SocketRecv(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf, int timeout)
-        {
-
+        size_t SocketRecv(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf, int timeout) {
+            return 0;
         }
     }
 }

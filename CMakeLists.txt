@@ -46,7 +46,7 @@ endif()
 # Add and initialize subdirectories.
 add_subdirectory(${COINBILL_LIB_DIR}/Network/)
 add_subdirectory(${COINBILL_LIB_DIR}/Support/)
-
+add_subdirectory(${COINBILL_LIB_DIR}/User/)
 
 # Now compile it.
 AddCoinbill_Exe(CoinBillExec ${COINBILL_LIB_DIR}/CoinBill.cpp)

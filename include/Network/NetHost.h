@@ -3,11 +3,12 @@
 
 namespace CoinBill
 {
-    class Host
+    class NetHost
     {
     public:
-
         unsigned int getNumNodes() const;
+        unsigned int getNumCallback() const;
+
     private:
     };
 }
