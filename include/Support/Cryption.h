@@ -33,8 +33,8 @@ namespace CoinBill
         void* get512AlignedBuffer(size_t szBuf);
         SHA_REASON getSHA256Hash(void* pOut, void* pIn, size_t szIn);
         SHA_REASON getSHA512Hash(void* pOut, void* pIn, size_t szIn);
-        RSA_REASON getRSASignature(void* pOut, void* pIn, size_t szIn, RSA* pPrivate);
-        RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, size_t szSig, RSA* pPublic);
+        RSA_REASON getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate);
+        RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic);
         bool isSHA256HashEqual(void* pRHS, void *pLHS);
         bool isSHA512HashEqual(void* pRHS, void *pLHS);
         bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);

@@ -62,7 +62,7 @@ namespace CoinBill
         return SHA_REASON::SUCCESSED;
     }
     
-    RSA_REASON Cryption::getRSASignature(void* pOut, void* pIn, size_t szIn, RSA* pPrivate) {
+    RSA_REASON Cryption::getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate) {
         // Encrypting pIn(Signature)
         IF_FAILED( RSA_private_encrypt(
             szIn,                   // Signature Size.
@@ -76,7 +76,7 @@ namespace CoinBill
     }
 
     // RSA Signature Check Implements.
-    RSA_REASON Cryption::isRSASignatureValid(void* pRaw, void* pSig, size_t szSig, RSA* pPublic) {
+    RSA_REASON Cryption::isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic) {
         unsigned int RoundIndex = 0;
 
         // Checking that this is a 256 byte rounded signiture.

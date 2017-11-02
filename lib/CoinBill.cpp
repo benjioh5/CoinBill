@@ -4,4 +4,5 @@
 int main(int args, char* argc[], char* argv[])
 {
     CoinBill::SocketBinding::InitSocket();
+    CoinBill::Cryption C;
 }
