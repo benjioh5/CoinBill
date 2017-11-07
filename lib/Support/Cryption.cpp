@@ -145,7 +145,7 @@ namespace CoinBill
 
         return isSHA256HashEqual(blockHash, hash);
     }
-    bool Cryption::proofBlockHeaderSHA256(const SHA512_t& hash, const BlockHeader& block) {
+    bool Cryption::proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeader& block) {
         SHA512_t blockHash;
 
         if (getSHA512Hash(blockHash, (void*)&block, sizeof(BlockHeader)) != SHA_REASON::SUCCESSED)
