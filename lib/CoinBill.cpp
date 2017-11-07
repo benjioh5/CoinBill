@@ -3,6 +3,8 @@
 
 int main(int args, char* argc[], char* argv[])
 {
+    // We should initialize socket binding for nativs.
     CoinBill::SocketBinding::InitSocket();
-    CoinBill::Cryption C;
+
+
 }

@@ -21,11 +21,11 @@ namespace CoinBill
         ERR_free_strings();
     }
 
-    bool Cryption::isSHA256HashEqual(void* pRHS, void* pLHS) {
-        return iterate_check<uint64_t, 4>(pRHS, pLHS);
+    bool Cryption::isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS) {
+        return LHS == RHS;
     }
-    bool Cryption::isSHA512HashEqual(void* pRHS, void* pLHS) {
-        return iterate_check<uint64_t, 8>(pRHS, pLHS);
+    bool Cryption::isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS) {
+        return LHS == RHS;
     }
     
     // TODO : this buffers to managed buffer for faster allocation speed.
@@ -45,20 +45,20 @@ namespace CoinBill
     }
 
     // SHA Hasing Method Implements.
-    SHA_REASON Cryption::getSHA256Hash(void* pOut, void* pIn, size_t szIn) {
+    SHA_REASON Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
         SHA256_CTX sha256;
         // Hash creation.
         IF_FAILED(SHA256_Init(&sha256)                          , SHA_REASON::FAILED_INIT  );
         IF_FAILED(SHA256_Update(&sha256, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
-        IF_FAILED(SHA256_Final((unsigned char*)pOut, &sha256)   , SHA_REASON::FAILED_UPDATE);
+        IF_FAILED(SHA256_Final(Out.toUint8(), &sha256)          , SHA_REASON::FAILED_UPDATE);
         return SHA_REASON::SUCCESSED;
     }
-    SHA_REASON Cryption::getSHA512Hash(void* pOut, void* pIn, size_t szIn) {
+    SHA_REASON Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
         SHA512_CTX sha512;
         // Hash creation.
         IF_FAILED(SHA512_Init(&sha512)                          , SHA_REASON::FAILED_INIT  );
         IF_FAILED(SHA512_Update(&sha512, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
-        IF_FAILED(SHA512_Final((unsigned char*)pOut, &sha512)   , SHA_REASON::FAILED_UPDATE);
+        IF_FAILED(SHA512_Final(Out.toUint8(), &sha512)          , SHA_REASON::FAILED_UPDATE);
         return SHA_REASON::SUCCESSED;
     }
     
@@ -97,19 +97,8 @@ namespace CoinBill
         ), RSA_REASON::FAILED_DECRYPT);
 
         // We need to check it rounded, because we are usally goind to use rounded signature.
-        switch (RoundIndex) {
-        case 0: 
-            // This mean not rounded.
-            break;
-        case 1: 
-            IF_FAILED(isSHA256HashEqual(pSig, pDecrypted), RSA_REASON::NOT_VALID); 
-            break;
-        case 2: 
-            IF_FAILED(isSHA512HashEqual(pSig, pDecrypted), RSA_REASON::NOT_VALID); 
-            break;
-        default: 
-            IF_FAILED(iterate_check<uint64_t>(pSig, pDecrypted, RoundIndex * (256 / sizeof(uint64_t))), RSA_REASON::NOT_VALID); 
-            break;
+        if (RoundIndex) {
+            IF_FAILED(iterate_cmp<uint64_t>(pSig, pDecrypted, RoundIndex), RSA_REASON::NOT_VALID);
         }
 
         // Now we need to check it very slowly.
@@ -118,9 +107,9 @@ namespace CoinBill
 
 
         // Now we are going to check the body first, and after tip of signature.
-        IF_FAILED(iterate_check<uint64_t>(pSig, pDecrypted, szBody), RSA_REASON::NOT_VALID);
+        IF_FAILED(iterate_cmp<uint64_t>(pSig, pDecrypted, szBody), RSA_REASON::NOT_VALID);
         IF_FAILED(
-            iterate_check<uint8_t >(
+            iterate_cmp<uint8_t >(
                 offset(pSig        ,(szSig - szTip)),
                 offset(pDecrypted  ,(szSig - szTip)), 
                 szTip), 

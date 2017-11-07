@@ -8,6 +8,7 @@
 #include <openssl/rsa.h>
 
 #include <vector>
+#include <Support/BigInt.h>
 
 namespace CoinBill
 {
@@ -31,12 +32,12 @@ namespace CoinBill
         // This is very basic methods for cryption. 
         void* get256AlignedBuffer(size_t szBuf);
         void* get512AlignedBuffer(size_t szBuf);
-        SHA_REASON getSHA256Hash(void* pOut, void* pIn, size_t szIn);
-        SHA_REASON getSHA512Hash(void* pOut, void* pIn, size_t szIn);
+        SHA_REASON getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
+        SHA_REASON getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn);
         RSA_REASON getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate);
         RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic);
-        bool isSHA256HashEqual(void* pRHS, void *pLHS);
-        bool isSHA512HashEqual(void* pRHS, void *pLHS);
+        bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
+        bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
         bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
         bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
 

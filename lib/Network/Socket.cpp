@@ -1,4 +1,3 @@
-#include <Network/NetHost.h>
 #include <Network/Socket.h>
 
 namespace CoinBill
