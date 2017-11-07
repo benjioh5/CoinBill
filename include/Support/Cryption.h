@@ -23,12 +23,9 @@ namespace CoinBill
         SUCCESSED, NOT_VALID, KEY_INVALID, FAILED_DECRYPT, FAILED_ENCRYPT
     };
 
-    class BlockHeader;
-    class Cryption final
+    class BlockHeaderV1;
+    namespace Cryption 
     {
-        friend class Signature;
-
-    protected:
         // Low Level Binding Methods.
         // This is very basic methods for cryption. 
         void* get256AlignedBuffer(size_t szBuf);
@@ -41,18 +38,12 @@ namespace CoinBill
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
         bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
         bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
-
-    public:
-        Cryption();
-        ~Cryption();
-
-        bool hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeader& block);
-        bool hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeader& block);
+        bool hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeaderV1& block);
+        bool hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeaderV1& block);
         bool hashBlockFullSHA256(SHA256_t& hash);
         bool hashBlockFullSHA512(SHA512_t& hash);
-
-        bool proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeader& block);
-        bool proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeader& block);
+        bool proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeaderV1& block);
+        bool proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeaderV1& block);
     };
 };
 

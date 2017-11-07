@@ -5,11 +5,12 @@
 
 namespace CoinBill
 {
-    struct BlockHeaderv1
+    class Wallet;
+    struct BlockHeaderV1
     {
     
         SHA512_t    m_PrevHash;
-        ACCOUNT     m_Auther;
+        SHA256_t    m_Auther;
 
         uint64_t    m_Version;
         uint64_t    m_TimeStamp;
@@ -22,11 +23,14 @@ namespace CoinBill
         uint64_t    m_Nonce;
     };
 
-    class Blockv1
+    struct BlockV1
     {
-        BlockHeaderv1   m_Header;
+        BlockHeaderV1   m_Header;
         SHA512_t        m_HeaderHash;
     };
+
+
+    BlockV1* CreateNewBlock(Wallet* user, BlockV1* prev);
 }
 
 #endif

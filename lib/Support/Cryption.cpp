@@ -3,7 +3,7 @@
 #include <Support/Basic.h>
 #include <Support/Cryption.h>
 
-#include <User/Block.h>
+#include <User/Blockv1.h>
 
 // Basic OpenSSL Headers.
 #include <openssl/conf.h>
@@ -122,11 +122,11 @@ namespace CoinBill
         return RSA_REASON::SUCCESSED;
     }
 
-    bool Cryption::hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeader& block) {
-        return getSHA256Hash(hash, (void*)&block, sizeof(BlockHeader)) == SHA_REASON::SUCCESSED;
+    bool Cryption::hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeaderV1& block) {
+        return getSHA256Hash(hash, (void*)&block, sizeof(BlockHeaderV1)) == SHA_REASON::SUCCESSED;
     }
-    bool Cryption::hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeader& block) {
-        return getSHA512Hash(hash, (void*)&block, sizeof(BlockHeader)) == SHA_REASON::SUCCESSED;
+    bool Cryption::hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeaderV1& block) {
+        return getSHA512Hash(hash, (void*)&block, sizeof(BlockHeaderV1)) == SHA_REASON::SUCCESSED;
     }
     bool Cryption::hashBlockFullSHA256(SHA256_t& hash) {
         // Not implemented yet.
@@ -137,23 +137,20 @@ namespace CoinBill
         return false;
     }
 
-    bool Cryption::proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeader& block) {
+    bool Cryption::proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeaderV1& block) {
         SHA256_t blockHash;
 
-        if (getSHA256Hash(blockHash, (void*)&block, sizeof(BlockHeader)) != SHA_REASON::SUCCESSED)
+        if (getSHA256Hash(blockHash, (void*)&block, sizeof(BlockHeaderV1)) != SHA_REASON::SUCCESSED)
             return false;
 
         return isSHA256HashEqual(blockHash, hash);
     }
-    bool Cryption::proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeader& block) {
+    bool Cryption::proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeaderV1& block) {
         SHA512_t blockHash;
 
-        if (getSHA512Hash(blockHash, (void*)&block, sizeof(BlockHeader)) != SHA_REASON::SUCCESSED)
+        if (getSHA512Hash(blockHash, (void*)&block, sizeof(BlockHeaderV1)) != SHA_REASON::SUCCESSED)
             return false;
 
         return isSHA512HashEqual(blockHash, hash);
     }
-
-    Cryption::Cryption() { }
-    Cryption::~Cryption() { }
 }
