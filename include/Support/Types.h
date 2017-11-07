@@ -49,14 +49,13 @@ namespace CoinBill
         uint64_t* toUint64() { return toType<uint64_t>(); }
     };
 
-    typedef BigInt<2, uint64_t> uint128_t;
-    typedef BigInt<4, uint64_t> uint256_t;
-    typedef BigInt<8, uint64_t> uint512_t;
+    typedef BigInt<2, uint64_t>             uint128_t;
+    typedef BigInt<4, uint64_t>             uint256_t;
+    typedef BigInt<8, uint64_t>             uint512_t;
 
-    typedef uint256_t SHA256_t;
-    typedef uint512_t SHA512_t;
-    typedef uint256_t RSA256_t;
-    
+    typedef uint256_t                       SHA256_t;
+    typedef uint512_t                       SHA512_t;
+    typedef uint256_t                       RSA256_t;
 }
 
 #endif

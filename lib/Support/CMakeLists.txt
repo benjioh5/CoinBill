@@ -3,6 +3,6 @@ AddCoinbill_Lib(CoinBillSupport
 
     ${COINBILL_INC_DIR}/Support/BlockTool.h
     ${COINBILL_INC_DIR}/Support/Basic.h
-    ${COINBILL_INC_DIR}/Support/BigInt.h
+    ${COINBILL_INC_DIR}/Support/Types.h
     ${COINBILL_INC_DIR}/Support/Cryption.h
 )

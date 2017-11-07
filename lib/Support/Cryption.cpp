@@ -3,6 +3,8 @@
 #include <Support/Basic.h>
 #include <Support/Cryption.h>
 
+#include <User/Block.h>
+
 // Basic OpenSSL Headers.
 #include <openssl/conf.h>
 #include <openssl/evp.h>
@@ -118,6 +120,38 @@ namespace CoinBill
 
         // If there is no problem, this is valid signature.
         return RSA_REASON::SUCCESSED;
+    }
+
+    bool Cryption::hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeader& block) {
+        return getSHA256Hash(hash, (void*)&block, sizeof(BlockHeader)) == SHA_REASON::SUCCESSED;
+    }
+    bool Cryption::hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeader& block) {
+        return getSHA512Hash(hash, (void*)&block, sizeof(BlockHeader)) == SHA_REASON::SUCCESSED;
+    }
+    bool Cryption::hashBlockFullSHA256(SHA256_t& hash) {
+        // Not implemented yet.
+        return false;
+    }
+    bool Cryption::hashBlockFullSHA512(SHA512_t& hash) {
+        // Not implemented yet.
+        return false;
+    }
+
+    bool Cryption::proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeader& block) {
+        SHA256_t blockHash;
+
+        if (getSHA256Hash(blockHash, (void*)&block, sizeof(BlockHeader)) != SHA_REASON::SUCCESSED)
+            return false;
+
+        return isSHA256HashEqual(blockHash, hash);
+    }
+    bool Cryption::proofBlockHeaderSHA256(const SHA512_t& hash, const BlockHeader& block) {
+        SHA512_t blockHash;
+
+        if (getSHA512Hash(blockHash, (void*)&block, sizeof(BlockHeader)) != SHA_REASON::SUCCESSED)
+            return false;
+
+        return isSHA512HashEqual(blockHash, hash);
     }
 
     Cryption::Cryption() { }

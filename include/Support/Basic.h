@@ -12,7 +12,7 @@ namespace CoinBill
 
     // TODO : Use SIMD instructions for faster checks.
     template <class Type, unsigned int cycle>
-    inline int iterate_cmp(void *LHS, void *RHS) {
+    inline long long iterate_cmp(void *LHS, void *RHS) {
         for (unsigned int i = 0; i < cycle; ++i)
             if (((Type*)LHS)[i] != ((Type*)RHS)[i]) 
                 return ((Type*)LHS)[i] - ((Type*)RHS)[i];
@@ -20,7 +20,7 @@ namespace CoinBill
     }
 
     template <class Type>
-    inline Type iterate_cmp(void *LHS, void *RHS, unsigned int cycle) {
+    inline long long iterate_cmp(void *LHS, void *RHS, unsigned int cycle) {
         for (unsigned int i = 0; i < cycle; ++i)
             if (((Type*)LHS)[i] != ((Type*)RHS)[i])
                 return ((Type*)LHS)[i] - ((Type*)RHS)[i];

@@ -8,7 +8,7 @@
 #include <openssl/rsa.h>
 
 #include <vector>
-#include <Support/BigInt.h>
+#include <Support/Types.h>
 
 namespace CoinBill
 {
@@ -23,6 +23,7 @@ namespace CoinBill
         SUCCESSED, NOT_VALID, KEY_INVALID, FAILED_DECRYPT, FAILED_ENCRYPT
     };
 
+    class BlockHeader;
     class Cryption final
     {
         friend class Signature;
@@ -44,6 +45,14 @@ namespace CoinBill
     public:
         Cryption();
         ~Cryption();
+
+        bool hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeader& block);
+        bool hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeader& block);
+        bool hashBlockFullSHA256(SHA256_t& hash);
+        bool hashBlockFullSHA512(SHA512_t& hash);
+
+        bool proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeader& block);
+        bool proofBlockHeaderSHA256(const SHA512_t& hash, const BlockHeader& block);
     };
 };
 
