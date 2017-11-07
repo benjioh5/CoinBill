@@ -5,12 +5,10 @@
 
 namespace CoinBill
 {
-    class Transaction
+    class TransactionBase
     {
-        RSA256_t TransKey;
-        SHA256_t TransHash;
-
-
+        SHA256_t    m_TransHash;
+        ACCOUNT     m_TransAuther;
     };
 }
 
