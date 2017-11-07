@@ -5,8 +5,9 @@
 
 namespace CoinBill
 {
-    struct BlockHeader
+    class BlockHeader
     {
+    public:
         // The hash of previus block.
         // This isn't a header of block hash. this includes full hash of full block object.
         SHA512_t        m_PrevHash;

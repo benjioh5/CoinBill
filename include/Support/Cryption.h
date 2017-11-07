@@ -52,7 +52,7 @@ namespace CoinBill
         bool hashBlockFullSHA512(SHA512_t& hash);
 
         bool proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeader& block);
-        bool proofBlockHeaderSHA256(const SHA512_t& hash, const BlockHeader& block);
+        bool proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeader& block);
     };
 };
 

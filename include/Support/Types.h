@@ -14,18 +14,16 @@ namespace CoinBill
         BaseTy data[size];
 
     public:
-        inline friend bool operator==(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>(LHS.data, RHS.data) == 0; }
-        inline friend bool operator!=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>(LHS.data, RHS.data) != 0; }
+        inline friend bool operator==(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) == 0; }
+        inline friend bool operator!=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) != 0; }
         inline operator BaseTy*() { return data; }
 
         template <class Ty, unsigned int szToTy = (sizeof(BaseTy) * size) / sizeof(Ty)>
         Ty* toType(unsigned int& _size) {
-            static_assert(sizeof(Ty) > sizeof(BaseTy) * size);
             _size = szToTy; return (Ty*)data;
         }
         template <class Ty>
         Ty* toType() {
-            static_assert(sizeof(Ty) > sizeof(BaseTy) * size);
             return (Ty*)data;
         }
 
