@@ -58,6 +58,7 @@ namespace CoinBill
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
     typedef uint256_t                                               RSA256_t;
+    typedef uint256_t                                               AUTHER_t;
 }
 
 #endif
