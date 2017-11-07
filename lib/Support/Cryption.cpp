@@ -98,7 +98,7 @@ namespace CoinBill
             RSA_PKCS1_PADDING           // Signature Padding.
         ), RSA_REASON::FAILED_DECRYPT);
 
-        // We need to check it rounded, because we are usally goind to use rounded signature.
+        // We need to check it rounded, because we are usally going to use rounded signature.
         if (RoundIndex) {
             IF_FAILED(iterate_cmp<uint64_t>(pSig, pDecrypted, RoundIndex), RSA_REASON::NOT_VALID);
         }
