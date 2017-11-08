@@ -21,6 +21,8 @@ namespace CoinBill
         inline friend bool operator> (const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >  0; }
         inline friend bool operator>=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >= 0; }
         inline operator BaseTy*() { return data; }
+        inline operator void*() { return (void*)data; }
+        inline operator sizeof(const MTy& RHS)() { return sizeof(BaseTy) * size; }
 
         template <class Ty, unsigned int szToTy = (sizeof(BaseTy) * size) / sizeof(Ty)>
         Ty* toType(unsigned int& _size) {
@@ -49,6 +51,11 @@ namespace CoinBill
         uint16_t* toUint16() { return toType<uint16_t>(); }
         uint32_t* toUint32() { return toType<uint32_t>(); }
         uint64_t* toUint64() { return toType<uint64_t>(); }
+
+        // I think... we can make this lot more faster tho.
+        void ZeroFill() {
+            for (unsigned int i = 0; i < size; ++i) data[i] = 0;
+        }
     };
 
     typedef BigInt<2, uint64_t>                                     uint128_t;
@@ -58,6 +65,7 @@ namespace CoinBill
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
     typedef uint256_t                                               RSA256_t;
+    typedef uint512_t                                               RSA512_t;
 }
 
 #endif

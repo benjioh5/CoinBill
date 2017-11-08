@@ -46,6 +46,34 @@ namespace CoinBill
         return true;
     }
 
+    bool Cryption::getHashBasedSignature256(RSA256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
+        SHA256_t tmpHash; 
+        getSHA256Hash(tmpHash, pIn, szIn);
+        
+        return getRSASignature(Sig, tmpHash, sizeof(RSA256_t), pPrivate) == RSA_REASON::SUCCESSED;
+    }
+
+    bool Cryption::proofHashBasedSignature256(RSA256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
+        SHA256_t tmpHash; 
+        getSHA256Hash(tmpHash, pRaw, szRaw);
+
+        return isRSASignatureValid(tmpHash, Sig, sizeof(RSA256_t), pPublic) == RSA_REASON::SUCCESSED;
+    }
+
+    bool Cryption::getHashBasedSignature512(RSA512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
+        SHA512_t tmpHash; 
+        getSHA512Hash(tmpHash, pIn, szIn);
+
+        return getRSASignature(Sig, tmpHash, sizeof(RSA512_t), pPrivate) == RSA_REASON::SUCCESSED;
+    }
+
+    bool Cryption::proofHashBasedSignature512(RSA512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
+        SHA512_t tmpHash; 
+        getSHA512Hash(tmpHash, pRaw, szRaw);
+
+        return isRSASignatureValid(tmpHash, Sig, sizeof(RSA512_t), pPublic) == RSA_REASON::SUCCESSED;
+    }
+
     // SHA Hasing Method Implements.
     SHA_REASON Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
         SHA256_CTX sha256;
@@ -120,37 +148,5 @@ namespace CoinBill
 
         // If there is no problem, this is valid signature.
         return RSA_REASON::SUCCESSED;
-    }
-
-    bool Cryption::hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeaderV1& block) {
-        return getSHA256Hash(hash, (void*)&block, sizeof(BlockHeaderV1)) == SHA_REASON::SUCCESSED;
-    }
-    bool Cryption::hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeaderV1& block) {
-        return getSHA512Hash(hash, (void*)&block, sizeof(BlockHeaderV1)) == SHA_REASON::SUCCESSED;
-    }
-    bool Cryption::hashBlockFullSHA256(SHA256_t& hash) {
-        // Not implemented yet.
-        return false;
-    }
-    bool Cryption::hashBlockFullSHA512(SHA512_t& hash) {
-        // Not implemented yet.
-        return false;
-    }
-
-    bool Cryption::proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeaderV1& block) {
-        SHA256_t blockHash;
-
-        if (getSHA256Hash(blockHash, (void*)&block, sizeof(BlockHeaderV1)) != SHA_REASON::SUCCESSED)
-            return false;
-
-        return isSHA256HashEqual(blockHash, hash);
-    }
-    bool Cryption::proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeaderV1& block) {
-        SHA512_t blockHash;
-
-        if (getSHA512Hash(blockHash, (void*)&block, sizeof(BlockHeaderV1)) != SHA_REASON::SUCCESSED)
-            return false;
-
-        return isSHA512HashEqual(blockHash, hash);
     }
 }

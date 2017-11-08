@@ -32,18 +32,27 @@ namespace CoinBill
         void* get512AlignedBuffer(size_t szBuf);
         SHA_REASON getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
         SHA_REASON getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn);
+        template <class Ty>
+        SHA_REASON getSHA256Hash(SHA256_t& Out, Ty* pIn) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); }
+        template <class Ty>
+        SHA_REASON getSHA512Hash(SHA512_t& Out, Ty* pIn) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); }
+        template <class Ty, size_t size>
+        SHA_REASON getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); }
+        template <class Ty, size_t size>
+        SHA_REASON getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); }
+
         RSA_REASON getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate);
         RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic);
+
         bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
         bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
         bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
-        bool hashBlockHeaderSHA256(SHA256_t& hash, const BlockHeaderV1& block);
-        bool hashBlockHeaderSHA512(SHA512_t& hash, const BlockHeaderV1& block);
-        bool hashBlockFullSHA256(SHA256_t& hash);
-        bool hashBlockFullSHA512(SHA512_t& hash);
-        bool proofBlockHeaderSHA256(const SHA256_t& hash, const BlockHeaderV1& block);
-        bool proofBlockHeaderSHA512(const SHA512_t& hash, const BlockHeaderV1& block);
+
+        bool getHashBasedSignature256(RSA256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
+        bool proofHashBasedSignature256(RSA256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
+        bool getHashBasedSignature512(RSA512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
+        bool proofHashBasedSignature512(RSA512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
     };
 };
 

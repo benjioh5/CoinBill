@@ -29,8 +29,10 @@ namespace CoinBill
         SHA512_t        m_HeaderHash;
     };
 
-
-    BlockV1* CreateNewBlock(Wallet* user, BlockV1* prev);
+    BlockV1* createNewBlock(Wallet* user, BlockV1* prev);
+    BlockV1* refreshBlockNonce(BlockV1* block, bool rehash = true);
+    BlockV1* refreshBlockInfo(BlockV1* block, bool rehash = true);
+    BlockV1* refreshBlockHash(BlockV1* block, uint32_t cycle);
 }
 
 #endif
