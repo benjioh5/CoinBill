@@ -22,9 +22,8 @@ namespace CoinBill
         // Starting i with 1, because we prehashed it.
         // if it has 1 cycle will pass this job.
         for (unsigned int i = 1; i < cycle; ++i) {
-            Cryption::getSHA512Hash(curHash, curHash.toUint8());
+            Cryption::getSHA512Hash(curHash, &curHash);
         }
-
         return block;
     }
 

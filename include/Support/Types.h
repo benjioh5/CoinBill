@@ -6,9 +6,13 @@
 
 namespace CoinBill
 {
+    
     template <unsigned int size, class BaseTy = char>
     class BigInt
     {
+        // NOTE : DO NOT CREATE ANY VIRTUAL METHODS, OR ANY OTHER VARIABLES.
+        //        THIS IS FOR STORING RAW BIG INT VARIABLES.
+
     protected:
         typedef BigInt<size, BaseTy> MTy;
         BaseTy data[size];
@@ -22,6 +26,8 @@ namespace CoinBill
         inline friend bool operator>=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >= 0; }
         inline operator BaseTy*() { return data; }
         inline operator void*() { return (void*)data; }
+
+        size_t getSize() { return sizeof(BaseTy) * size; }
 
         template <class Ty, unsigned int szToTy = (sizeof(BaseTy) * size) / sizeof(Ty)>
         Ty* toType(unsigned int& _size) {
