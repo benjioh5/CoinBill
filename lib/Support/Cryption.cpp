@@ -46,32 +46,32 @@ namespace CoinBill
         return true;
     }
 
-    bool Cryption::getHashBasedSignature256(RSA256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
+    bool Cryption::getHashBasedSignature256(SIGN256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
         SHA256_t tmpHash; 
         getSHA256Hash(tmpHash, pIn, szIn);
         
-        return getRSASignature(Sig, tmpHash, sizeof(RSA256_t), pPrivate) == RSA_REASON::SUCCESSED;
+        return getRSASignature(Sig, tmpHash, sizeof(SIGN256_t), pPrivate) == RSA_REASON::SUCCESSED;
     }
 
-    bool Cryption::proofHashBasedSignature256(RSA256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
+    bool Cryption::proofHashBasedSignature256(SIGN256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
         SHA256_t tmpHash; 
         getSHA256Hash(tmpHash, pRaw, szRaw);
 
-        return isRSASignatureValid(tmpHash, Sig, sizeof(RSA256_t), pPublic) == RSA_REASON::SUCCESSED;
+        return isRSASignatureValid(tmpHash, Sig, sizeof(SIGN256_t), pPublic) == RSA_REASON::SUCCESSED;
     }
 
-    bool Cryption::getHashBasedSignature512(RSA512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
+    bool Cryption::getHashBasedSignature512(SIGN512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
         SHA512_t tmpHash; 
         getSHA512Hash(tmpHash, pIn, szIn);
 
-        return getRSASignature(Sig, tmpHash, sizeof(RSA512_t), pPrivate) == RSA_REASON::SUCCESSED;
+        return getRSASignature(Sig, tmpHash, sizeof(SIGN512_t), pPrivate) == RSA_REASON::SUCCESSED;
     }
 
-    bool Cryption::proofHashBasedSignature512(RSA512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
+    bool Cryption::proofHashBasedSignature512(SIGN512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
         SHA512_t tmpHash; 
         getSHA512Hash(tmpHash, pRaw, szRaw);
 
-        return isRSASignatureValid(tmpHash, Sig, sizeof(RSA512_t), pPublic) == RSA_REASON::SUCCESSED;
+        return isRSASignatureValid(tmpHash, Sig, sizeof(SIGN512_t), pPublic) == RSA_REASON::SUCCESSED;
     }
 
     // SHA Hasing Method Implements.

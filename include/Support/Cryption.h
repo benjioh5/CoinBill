@@ -49,10 +49,10 @@ namespace CoinBill
         bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
         bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
 
-        bool getHashBasedSignature256(RSA256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
-        bool proofHashBasedSignature256(RSA256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
-        bool getHashBasedSignature512(RSA512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
-        bool proofHashBasedSignature512(RSA512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
+        bool getHashBasedSignature256(SIGN256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
+        bool proofHashBasedSignature256(SIGN256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
+        bool getHashBasedSignature512(SIGN512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
+        bool proofHashBasedSignature512(SIGN512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
     };
 };
 
