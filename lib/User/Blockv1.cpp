@@ -14,7 +14,7 @@ namespace CoinBill
 
         // Reset hash.
         SHA512_t &curHash = block->m_HeaderHash; 
-        curHash.ZeroFill();
+        curHash = 0;
 
         // Prehash header.
         Cryption::getSHA512Hash(curHash, &block->m_Header);

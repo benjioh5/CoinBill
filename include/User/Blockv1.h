@@ -14,13 +14,13 @@ namespace CoinBill
 
         uint64_t    m_Version;
         uint64_t    m_TimeStamp;
-        uint64_t    m_Difficulty;
-        uint64_t    m_Number;
+        uint512_t   m_Difficulty;
+        uint256_t   m_Number;
         
-        uint64_t    m_CoinLimit;
-        uint64_t    m_CoinUsed;
+        uint128_t   m_CoinLimit;
+        uint128_t   m_CoinUsed;
         
-        uint64_t    m_Nonce;
+        uint256_t   m_Nonce;
 
         void dump();
     };
@@ -29,8 +29,6 @@ namespace CoinBill
     {
         BlockHeaderV1   m_Header;
         SHA512_t        m_HeaderHash;
-        
-
 
         void dump();
     };

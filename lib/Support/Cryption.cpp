@@ -53,7 +53,7 @@ namespace CoinBill
         RSA     *PrvKey;
         void    *RawKey = Private;
 
-        d2i_RSAPrivateKey(&PrvKey, (uint8_t**)&RawKey, Private.getSize());
+        d2i_RSAPrivateKey(&PrvKey, (const unsigned char**)&RawKey, Private.getSize());
 
         // Encrypting pIn(Signature)
         IF_FAILED( RSA_private_encrypt(
@@ -71,7 +71,7 @@ namespace CoinBill
         RSA     *PubKey;
         void    *RawKey = Public;
 
-        d2i_RSAPublicKey(&PubKey, (uint8_t**)&RawKey, Public.getSize());
+        d2i_RSAPublicKey(&PubKey, (const unsigned char**)&RawKey, Public.getSize());
 
         // Decrypting pIn(Signature)
         IF_FAILED(RSA_public_decrypt(
