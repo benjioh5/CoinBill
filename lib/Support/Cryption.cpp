@@ -29,29 +29,6 @@ namespace CoinBill
     bool Cryption::isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS) {
         return LHS == RHS;
     }
-    
-    // TODO : this buffers to managed buffer for faster allocation speed.
-    void* Cryption::get256AlignedBuffer(size_t szBuf) {
-        return operator new(round_up<256>(szBuf));
-    }
-    void* Cryption::get512AlignedBuffer(size_t szBuf) {
-        return operator new(round_up<512>(szBuf));
-    }
-    void* Cryption::get2048AlignedBuffer(size_t szBuf) {
-        return operator new(round_up<2048>(szBuf));
-    }
-    bool Cryption::Dispose256AlignedBuffer(void* pBuf, size_t szBuf) {
-        delete pBuf;
-        return true;
-    }
-    bool Cryption::Dispose512AlignedBuffer(void* pBuf, size_t szBuf) {
-        delete pBuf;
-        return true;
-    }
-    bool Cryption::Dispose2048AlignedBuffer(void* pBuf, size_t szBuf) {
-        delete pBuf;
-        return true;
-    }
 
     // SHA Hasing Method Implements.
     CRESULT Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {

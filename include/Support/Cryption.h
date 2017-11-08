@@ -34,24 +34,44 @@ namespace CoinBill
     {
         // Low Level Binding Methods.
         // This is very basic methods for cryption. 
-        void* get256AlignedBuffer(size_t szBuf);
-        void* get512AlignedBuffer(size_t szBuf);
-        void* get2048AlignedBuffer(size_t szBuf);
-        bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
-        bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
-        bool Dispose2048AlignedBuffer(void* pBuf, size_t szBuf);
         CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private);
         CRESULT getRSAPubDecrpyt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
+        template <class InTy>
+        CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA2048_t& Private) { 
+            return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy), Private); 
+        }
+        template <class InTy>
+        CRESULT getRSAPubDecrpyt(void* pOut, InTy* pIn, RSA2048_t& Public) {
+            return getRSAPubDecrpyt(pOut, (void*)pIn, sizeof(InTy), Public);
+        }
+        template <class InTy, size_t size>
+        CRESULT getRSAPrvEncrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Private) {
+            return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy) * size, Private);
+        }
+        template <class InTy, size_t size>
+        CRESULT getRSAPubDecrpyt(void* pOut, InTy(&pIn)[size], RSA2048_t& Public) {
+            return getRSAPubDecrpyt(pOut, (void*)pIn, sizeof(InTy) * size, Public);
+        }
+
         CRESULT getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
         CRESULT getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn);
+
         template <class Ty>
-        CRESULT getSHA256Hash(SHA256_t& Out, Ty* pIn) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); }
+        CRESULT getSHA256Hash(SHA256_t& Out, Ty* pIn) { 
+            return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); 
+        }
         template <class Ty>
-        CRESULT getSHA512Hash(SHA512_t& Out, Ty* pIn) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); }
+        CRESULT getSHA512Hash(SHA512_t& Out, Ty* pIn) { 
+            return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); 
+        }
         template <class Ty, size_t size>
-        CRESULT getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); }
+        CRESULT getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { 
+            return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); 
+        }
         template <class Ty, size_t size>
-        CRESULT getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); }
+        CRESULT getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { 
+            return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); 
+        }
 
         bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);

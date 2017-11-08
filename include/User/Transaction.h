@@ -6,7 +6,7 @@
 namespace CoinBill
 {
     enum TransactionType {
-        MINE,
+        MINED,
         TRANSFER,
     };
 
