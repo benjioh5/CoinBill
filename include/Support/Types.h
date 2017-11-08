@@ -47,6 +47,14 @@ namespace CoinBill
             }
         }
 
+        bool isEmpty() {
+            for (unsigned int i = 0; i < size; ++i)
+                if (data[i] != 0)
+                    return false;
+
+            return true;
+        }
+
         uint8_t* toUint8(unsigned int& _size) { return toType<uint8_t>(_size); }
         uint16_t* toUint16(unsigned int& _size) { return toType<uint16_t>(_size); }
         uint32_t* toUint32(unsigned int& _size) { return toType<uint32_t>(_size); }
@@ -71,7 +79,6 @@ namespace CoinBill
     typedef uint2048_t                                              RSA2048_t;
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
-    
 }
 
 #endif
