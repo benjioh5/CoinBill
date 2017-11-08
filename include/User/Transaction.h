@@ -12,17 +12,17 @@ namespace CoinBill
 
     struct TransactionBase
     {
-        TransactionType m_TransType;
+        TransactionType     m_TransType;
 
-        SHA256_t        m_TransHash;
-        SHA256_t        m_TransAuther;
-        RSA2048_t       m_TransKey;
+        SHA256_t            m_TransHash;
+        SHA256_t            m_TransAuther;
+        RSA2048_t           m_TransKey;
     };
 
     class TransactionNode 
     {
-        TransactionBase* currNode;
-        TransactionBase* prevNode;
+        TransactionBase*    m_currNode;
+        TransactionBase*    m_prevNode;
     };
 }
 
