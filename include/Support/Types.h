@@ -22,7 +22,6 @@ namespace CoinBill
         inline friend bool operator>=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >= 0; }
         inline operator BaseTy*() { return data; }
         inline operator void*() { return (void*)data; }
-        inline operator sizeof(const MTy& RHS)() { return sizeof(BaseTy) * size; }
 
         template <class Ty, unsigned int szToTy = (sizeof(BaseTy) * size) / sizeof(Ty)>
         Ty* toType(unsigned int& _size) {

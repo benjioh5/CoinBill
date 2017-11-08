@@ -23,7 +23,7 @@ namespace CoinBill
         SUCCESSED, NOT_VALID, KEY_INVALID, FAILED_DECRYPT, FAILED_ENCRYPT
     };
 
-    class BlockHeaderV1;
+    struct BlockHeaderV1;
     namespace Cryption 
     {
         // Low Level Binding Methods.
