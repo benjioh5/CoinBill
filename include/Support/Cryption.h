@@ -15,12 +15,18 @@ namespace CoinBill
     void InitCryption();
     void StopCryption();
 
-    enum class SHA_REASON {
-        SUCCESSED, FAILED_INIT, FAILED_UPDATE, FAILED_FINAL
-    };
+    enum class CRESULT {
+        SUCCESSED                           = 0x00,
+        FAILED_UNKNOWN                      = 0xFF,
 
-    enum class RSA_REASON {
-        SUCCESSED, NOT_VALID, KEY_INVALID, FAILED_DECRYPT, FAILED_ENCRYPT
+        FAILED_INIT                         = 0x01,
+        FAILED_UPDATE                       = 0x02, 
+        FAILED_FINAL                        = 0x03,
+        FAILED_ENCRYPT                      = 0x04,
+        FAILED_DECRYPT                      = 0x05,
+
+        INVALID_PUB_KEY                     = 0x11,
+        INVALID_PRV_KEY                     = 0x12
     };
 
     struct BlockHeaderV1;
@@ -30,29 +36,25 @@ namespace CoinBill
         // This is very basic methods for cryption. 
         void* get256AlignedBuffer(size_t szBuf);
         void* get512AlignedBuffer(size_t szBuf);
-        SHA_REASON getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
-        SHA_REASON getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn);
+        void* get2048AlignedBuffer(size_t szBuf);
+        bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
+        bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
+        bool Dispose2048AlignedBuffer(void* pBuf, size_t szBuf);
+        CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private);
+        CRESULT getRSAPubDecrpyt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
+        CRESULT getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
+        CRESULT getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn);
         template <class Ty>
-        SHA_REASON getSHA256Hash(SHA256_t& Out, Ty* pIn) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); }
+        CRESULT getSHA256Hash(SHA256_t& Out, Ty* pIn) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); }
         template <class Ty>
-        SHA_REASON getSHA512Hash(SHA512_t& Out, Ty* pIn) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); }
+        CRESULT getSHA512Hash(SHA512_t& Out, Ty* pIn) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); }
         template <class Ty, size_t size>
-        SHA_REASON getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); }
+        CRESULT getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); }
         template <class Ty, size_t size>
-        SHA_REASON getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); }
-
-        RSA_REASON getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate);
-        RSA_REASON isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic);
+        CRESULT getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); }
 
         bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
-        bool Dispose256AlignedBuffer(void* pBuf, size_t szBuf);
-        bool Dispose512AlignedBuffer(void* pBuf, size_t szBuf);
-
-        bool getHashBasedSignature256(SIGN256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
-        bool proofHashBasedSignature256(SIGN256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
-        bool getHashBasedSignature512(SIGN512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate);
-        bool proofHashBasedSignature512(SIGN512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic);
     };
 };
 

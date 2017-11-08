@@ -66,13 +66,11 @@ namespace CoinBill
     typedef BigInt<2, uint64_t>                                     uint128_t;
     typedef BigInt<4, uint64_t>                                     uint256_t;
     typedef BigInt<8, uint64_t>                                     uint512_t;
+    typedef BigInt<32, uint64_t>                                    uint2048_t;
 
+    typedef uint2048_t                                              RSA2048_t;
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
-    typedef uint256_t                                               RSA256_t;
-    typedef uint512_t                                               RSA512_t;
-    typedef uint256_t                                               SIGN256_t;
-    typedef uint512_t                                               SIGN512_t;
     
 }
 

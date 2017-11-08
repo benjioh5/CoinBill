@@ -31,11 +31,14 @@ namespace CoinBill
     }
     
     // TODO : this buffers to managed buffer for faster allocation speed.
-    void * Cryption::get256AlignedBuffer(size_t szBuf) {
+    void* Cryption::get256AlignedBuffer(size_t szBuf) {
         return operator new(round_up<256>(szBuf));
     }
-    void * Cryption::get512AlignedBuffer(size_t szBuf) {
+    void* Cryption::get512AlignedBuffer(size_t szBuf) {
         return operator new(round_up<512>(szBuf));
+    }
+    void* Cryption::get2048AlignedBuffer(size_t szBuf) {
+        return operator new(round_up<2048>(szBuf));
     }
     bool Cryption::Dispose256AlignedBuffer(void* pBuf, size_t szBuf) {
         delete pBuf;
@@ -45,108 +48,63 @@ namespace CoinBill
         delete pBuf;
         return true;
     }
-
-    bool Cryption::getHashBasedSignature256(SIGN256_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
-        SHA256_t tmpHash; 
-        getSHA256Hash(tmpHash, pIn, szIn);
-        
-        return getRSASignature(Sig, tmpHash, sizeof(SIGN256_t), pPrivate) == RSA_REASON::SUCCESSED;
-    }
-
-    bool Cryption::proofHashBasedSignature256(SIGN256_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
-        SHA256_t tmpHash; 
-        getSHA256Hash(tmpHash, pRaw, szRaw);
-
-        return isRSASignatureValid(tmpHash, Sig, sizeof(SIGN256_t), pPublic) == RSA_REASON::SUCCESSED;
-    }
-
-    bool Cryption::getHashBasedSignature512(SIGN512_t& Sig, void* pIn, unsigned int szIn, RSA* pPrivate) {
-        SHA512_t tmpHash; 
-        getSHA512Hash(tmpHash, pIn, szIn);
-
-        return getRSASignature(Sig, tmpHash, sizeof(SIGN512_t), pPrivate) == RSA_REASON::SUCCESSED;
-    }
-
-    bool Cryption::proofHashBasedSignature512(SIGN512_t& Sig, void* pRaw, unsigned int szRaw, RSA* pPublic) {
-        SHA512_t tmpHash; 
-        getSHA512Hash(tmpHash, pRaw, szRaw);
-
-        return isRSASignatureValid(tmpHash, Sig, sizeof(SIGN512_t), pPublic) == RSA_REASON::SUCCESSED;
+    bool Cryption::Dispose2048AlignedBuffer(void* pBuf, size_t szBuf) {
+        delete pBuf;
+        return true;
     }
 
     // SHA Hasing Method Implements.
-    SHA_REASON Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
+    CRESULT Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
         SHA256_CTX sha256;
         // Hash creation.
-        IF_FAILED(SHA256_Init(&sha256)                          , SHA_REASON::FAILED_INIT  );
-        IF_FAILED(SHA256_Update(&sha256, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
-        IF_FAILED(SHA256_Final(Out.toUint8(), &sha256)          , SHA_REASON::FAILED_UPDATE);
-        return SHA_REASON::SUCCESSED;
+        IF_FAILED(SHA256_Init(&sha256)                          , CRESULT::FAILED_INIT  );
+        IF_FAILED(SHA256_Update(&sha256, pIn, szIn)             , CRESULT::FAILED_UPDATE);
+        IF_FAILED(SHA256_Final(Out.toUint8(), &sha256)          , CRESULT::FAILED_UPDATE);
+        return CRESULT::SUCCESSED;
     }
-    SHA_REASON Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
+
+    CRESULT Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
         SHA512_CTX sha512;
         // Hash creation.
-        IF_FAILED(SHA512_Init(&sha512)                          , SHA_REASON::FAILED_INIT  );
-        IF_FAILED(SHA512_Update(&sha512, pIn, szIn)             , SHA_REASON::FAILED_UPDATE);
-        IF_FAILED(SHA512_Final(Out.toUint8(), &sha512)          , SHA_REASON::FAILED_UPDATE);
-        return SHA_REASON::SUCCESSED;
+        IF_FAILED(SHA512_Init(&sha512)                          , CRESULT::FAILED_INIT  );
+        IF_FAILED(SHA512_Update(&sha512, pIn, szIn)             , CRESULT::FAILED_UPDATE);
+        IF_FAILED(SHA512_Final(Out.toUint8(), &sha512)          , CRESULT::FAILED_UPDATE);
+        return CRESULT::SUCCESSED;
     }
-    
-    RSA_REASON Cryption::getRSASignature(void* pOut, void* pIn, unsigned int szIn, RSA* pPrivate) {
+
+    CRESULT Cryption::getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private) {
+        RSA     *PrvKey;
+        void    *RawKey = Private;
+
+        d2i_RSAPrivateKey(&PrvKey, (uint8_t**)&RawKey, Private.getSize());
+
         // Encrypting pIn(Signature)
         IF_FAILED( RSA_private_encrypt(
             szIn,                   // Signature Size.
             (unsigned char*)pIn,    // Signature Buffer.
             (unsigned char*)pOut,   // Output.
-            pPrivate,               // Signature Key.
+            PrvKey,                 // Signature Key.
             RSA_PKCS1_PADDING       // Signature Padding.
-        ), RSA_REASON::FAILED_ENCRYPT);
+        ), CRESULT::FAILED_ENCRYPT);
 
-        return RSA_REASON::SUCCESSED;
+        return CRESULT::SUCCESSED;
     }
 
-    // RSA Signature Check Implements.
-    RSA_REASON Cryption::isRSASignatureValid(void* pRaw, void* pSig, unsigned int szSig, RSA* pPublic) {
-        unsigned int RoundIndex = 0;
+    CRESULT Cryption::getRSAPubDecrpyt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public) {
+        RSA     *PubKey;
+        void    *RawKey = Public;
 
-        // Checking that this is a 256 byte rounded signiture.
-        if ((szSig % 256) == 0) {
-            RoundIndex = szSig / 256;
-        }
+        d2i_RSAPublicKey(&PubKey, (uint8_t**)&RawKey, Public.getSize());
 
-        // We can exit everywhere that has IF_FAILED, so we need to delete pDecrypted safely.
-        char* pDecrypted = new char[szSig]; std::unique_ptr<char> MemSafety((char*)pDecrypted);
+        // Decrypting pIn(Signature)
+        IF_FAILED(RSA_public_decrypt(
+            szIn,                   // Signature Size.
+            (unsigned char*)pIn,    // Signature Buffer.
+            (unsigned char*)pOut,   // Output.
+            PubKey,                 // Signature Key.
+            RSA_PKCS1_PADDING       // Signature Padding.
+        ), CRESULT::FAILED_DECRYPT);
 
-        // try decrypting signature.
-        IF_FAILED( RSA_public_decrypt(
-            szSig,                      // Signature Size.
-            (unsigned char*)pSig,       // Signature Buffer.
-            (unsigned char*)pDecrypted, // Output.
-            pPublic,                    // Signature Key.
-            RSA_PKCS1_PADDING           // Signature Padding.
-        ), RSA_REASON::FAILED_DECRYPT);
-
-        // We need to check it rounded, because we are usally going to use rounded signature.
-        if (RoundIndex) {
-            IF_FAILED(iterate_cmp<uint64_t>(pSig, pDecrypted, RoundIndex), RSA_REASON::NOT_VALID);
-        }
-
-        // Now we need to check it very slowly.
-        unsigned int szTip  = szSig % sizeof(uint64_t);
-        unsigned int szBody = szSig / sizeof(uint64_t);
-
-
-        // Now we are going to check the body first, and after tip of signature.
-        IF_FAILED(iterate_cmp<uint64_t>(pSig, pDecrypted, szBody), RSA_REASON::NOT_VALID);
-        IF_FAILED(
-            iterate_cmp<uint8_t >(
-                offset(pSig        ,(szSig - szTip)),
-                offset(pDecrypted  ,(szSig - szTip)), 
-                szTip), 
-            RSA_REASON::NOT_VALID);
-            
-
-        // If there is no problem, this is valid signature.
-        return RSA_REASON::SUCCESSED;
+        return CRESULT::SUCCESSED;
     }
 }

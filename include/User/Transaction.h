@@ -5,10 +5,16 @@
 
 namespace CoinBill
 {
+    enum TransactionType {
+        MINE,
+        TRANSFER,
+    };
+
     class TransactionBase
     {
-        SHA256_t    m_TransHash;
-        SHA256_t    m_TransAuther;
+        TransactionType m_TransType;
+        SHA256_t        m_TransHash;
+        SHA256_t        m_TransAuther;
     };
 }
 

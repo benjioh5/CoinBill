@@ -5,9 +5,11 @@
 namespace CoinBill
 {
     uint64_t Host::getHostVersion() {
+        // TODO : CMake based versioning.
         return 0;
     }
     uint64_t Host::getHostTime() {
+        // TODO : Use posix based time.
         time_t t;
         time(&t);
 

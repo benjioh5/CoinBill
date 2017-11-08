@@ -12,7 +12,7 @@ namespace CoinBill
         void notifyNewContract();
         void notifyNewWallet();
         void notifyNewTransaction();
-        void notifyPeers();
+        void notifyConnectedPeers();
 
         static uint64_t getHostVersion();
         static uint64_t getHostTime();
