@@ -15,7 +15,7 @@ namespace CoinBill
         // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
         // Initialize Winsock 2.
-        WSAData data;
+        WSAData data = { 0, };
         isSuccessed = !WSAStartup(MAKEWORD(2, 0), &data);
 #endif //COINBILL_WINDOWS
 
@@ -84,48 +84,87 @@ namespace CoinBill
             return isSuccessed;
         }
         bool SocketDisconnect(const SOCKET_HANDLE Handle) {
+            bool isSucessed = false;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+
+            // Returning zero mean successed.
+            // shutdown both connection by using shutdown method.
+            isSucessed = !shutdown((SOCKET)Handle, SD_BOTH);
 #endif
-            return true;
+            return isSucessed;
         }
 
         bool SocketBind(const SOCKET_HANDLE Handle, const std::string& Address, short Port) {
+            bool isSuccessed = false;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+            sockaddr_in service;
+
+            service.sin_family          = AF_INET;
+            service.sin_addr.s_addr     = inet_addr(Address.c_str());
+            service.sin_port            = htons(Port);
+
+            isSuccessed = !bind((SOCKET)Handle, (sockaddr*)&service, sizeof(service));
 #endif
-            return true;
+            return isSuccessed;
         }
         bool SocketListen(const SOCKET_HANDLE Handle) {
+            bool isSuccessed = false;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+            isSuccessed = !listen((SOCKET)Handle, SOMAXCONN);
 #endif
-            return true;
+            return isSuccessed;
         }
         bool SocketAccept(const SOCKET_HANDLE Handle, SOCKET_HANDLE& Accepted) {
+            bool isSuccessed = false;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+            int         addr_len;
+            sockaddr    addr;
+
+            if (SOCKET ac = accept((SOCKET)Handle, &addr, &addr_len)) {
+                Accepted    = (SOCKET_HANDLE)(ac);
+                isSuccessed = true;
+            }
 #endif
-            return true;
+            return isSuccessed;
         }
 
         size_t SocketSend(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf) {
+            size_t szSent = 0;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+            szSent = (size_t)send((SOCKET)Handle, (char*)pBuf, (int)szBuf, 0);
 #endif
-            return 0;
+            return szSent;
         }
         size_t SocketRecv(const SOCKET_HANDLE Handle, void* pBuf, size_t& szBuf, int timeout) {
+            size_t szRecved = 0;
+
 #ifdef COINBILL_USE_BOOST_ASIO
             // TODO : Boost implements.
 #elif  COINBILL_WINDOWS
+            // Winsock 2 implements. native binding.
+            szRecved = (size_t)recv((SOCKET)Handle, (char*)pBuf, (int)szBuf, 0);
 #endif
-            return 0;
+            return szRecved;
         }
     }
 }
