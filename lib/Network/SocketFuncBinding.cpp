@@ -9,15 +9,14 @@
 
 namespace CoinBill
 {
+    bool InitSocket() {
+        return true;
+    }
+    bool StopSocket() {
+        return true;
+    }
     namespace SocketBinding
     {
-        bool InitSocket() {
-            return true;
-        }
-        bool StopSocket() {
-            return true;
-        }
-
         bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type) {
             return true;
         }

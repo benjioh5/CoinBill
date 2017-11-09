@@ -6,13 +6,13 @@
 
 namespace CoinBill
 {
+    bool InitSocket();
+    bool StopSocket();
+
     namespace SocketBinding
     {
         typedef void* SOCKET_HANDLE;
 
-        bool InitSocket();
-        bool StopSocket();
-        
         bool SocketCreateUDP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type);
         bool SocketCreateTCP(SOCKET_HANDLE &Handle, const SOCKET_TYPE Type);
 
