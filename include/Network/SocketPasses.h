@@ -3,8 +3,15 @@
 
 namespace CoinBill
 {
+
     enum SOCKET_TYPE {
-        Stream, DGRAM, Raw
+#ifdef COINBILL_USE_BOOST_ASIO
+        // TODO : Boost implements.
+#elif  COINBILL_WINDOWS
+        Stream              = 1, 
+        DGRAM               = 2, 
+        Raw                 = 3
+#endif // COINBILL_WINDOWS
     };
 }
 
