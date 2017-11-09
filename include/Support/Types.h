@@ -10,7 +10,6 @@ namespace CoinBill
     template <unsigned int size, class BaseTy = unsigned char, BaseTy max_size = (BaseTy)(-1)>
     class BigInt
     {
-        static_assert(std::is_unsigned<BaseTy>);
         // NOTE : DO NOT CREATE ANY VIRTUAL METHODS, OR ANY OTHER VARIABLES.
         //        THIS IS FOR STORING RAW BIG INT VARIABLES.
     protected:

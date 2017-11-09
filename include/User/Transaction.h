@@ -21,8 +21,14 @@ namespace CoinBill
 
     class TransactionNode 
     {
-        TransactionBase*    m_currNode;
-        TransactionBase*    m_prevNode;
+        TransactionBase*    currNode;
+        TransactionBase*    prevNode;
+
+    public:
+        TransactionBase* getCurrNode();
+        TransactionBase* getNextNode();
+
+        bool isTransactionSigned();
     };
 }
 
