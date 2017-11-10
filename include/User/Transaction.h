@@ -15,7 +15,7 @@ namespace CoinBill
     struct TransactionBase
     {
         TransactionType     m_TransType;
-        SHA256_t            m_TransAutherSign;
+        RSA2048_t           m_TransAutherSign;
         RSA2048_t           m_TransAuther;
         
         // Time that created transaction.
@@ -38,7 +38,7 @@ namespace CoinBill
         TransactionNode& getNextNode();
 
         RSA2048_t& getTransAuther();
-        SHA256_t& getTransAutherSign();
+        RSA2048_t& getTransAutherSign();
 
         bool isNodeHasSign();
         bool isNodeOwnerSame(Wallet* user);
@@ -46,12 +46,12 @@ namespace CoinBill
         bool isNodeCoinReward();
         bool isNodeSignatureValid();
 
-        void RefreshNodeData();
-        void RefreshNodeSign(Wallet* user);
+        bool RefreshNodeData();
+        bool RefreshNodeSign(Wallet* user);
     };
 
-    SHA256_t signTransaction(TransactionBase& transaction, Wallet* user);
-    SHA256_t proofTransaction(TransactionBase& transaction, Wallet* user);
+    RSA2048_t encryptTransaction(TransactionBase& transaction, Wallet* user);
+    RSA2048_t decryptTransaction(TransactionBase& transaction, Wallet* user);
 }
 
 #endif

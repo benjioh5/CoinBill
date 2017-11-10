@@ -28,7 +28,8 @@ namespace CoinBill
         FAILED_NOT_ROUNDED                  = 0x06,
 
         INVALID_PUB_KEY                     = 0x11,
-        INVALID_PRV_KEY                     = 0x12
+        INVALID_PRV_KEY                     = 0x12,
+        INVALID_SIGNATURE                   = 0x21,
     };
 
     struct BlockHeaderV1;
@@ -37,22 +38,22 @@ namespace CoinBill
         // Low Level Binding Methods.
         // This is very basic methods for cryption. 
         CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private);
-        CRESULT getRSAPubDecrpyt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
+        CRESULT getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
         template <class InTy>
         CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA2048_t& Private) { 
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy), Private); 
         }
         template <class InTy>
-        CRESULT getRSAPubDecrpyt(void* pOut, InTy* pIn, RSA2048_t& Public) {
-            return getRSAPubDecrpyt(pOut, (void*)pIn, sizeof(InTy), Public);
+        CRESULT getRSAPubDecrypt(void* pOut, InTy* pIn, RSA2048_t& Public) {
+            return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy), Public);
         }
         template <class InTy, size_t size>
         CRESULT getRSAPrvEncrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Private) {
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy) * size, Private);
         }
         template <class InTy, size_t size>
-        CRESULT getRSAPubDecrpyt(void* pOut, InTy(&pIn)[size], RSA2048_t& Public) {
-            return getRSAPubDecrpyt(pOut, (void*)pIn, sizeof(InTy) * size, Public);
+        CRESULT getRSAPubDecrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Public) {
+            return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy) * size, Public);
         }
 
         CRESULT getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn);
@@ -78,50 +79,51 @@ namespace CoinBill
         bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
 
-        CRESULT getSignature256(SHA256_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
-        CRESULT getSignature512(SHA512_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
+        CRESULT getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
 
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature256(SHA256_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
-            AlignedTy AlignedIn; 
-            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy) );
-            memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty)        );
-            return getSignature256(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
-        }
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature256(SHA256_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
-            AlignedTy AlignedIn;
-            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy) );
-            memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty)        );
-            return getSignature256(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
-        }
-        template <class Ty, unsigned int size>
-        CRESULT getSignature256(SHA256_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
-            Ty AlignedIn[round_up<2048>(size)] = { 0, };
-            memcpy((void*) AlignedIn, (void*)In , sizeof(Ty));
-            return getSignature256(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
-        }
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature512(SHA512_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
+        CRESULT getSignature(RSA2048_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
-            return getSignature512(SigOut, (void*)&In, sizeof(AlignedTy), PrvKey);
+            return getSignature(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
         }
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature512(SHA512_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
+        CRESULT getSignature(RSA2048_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
-            return getSignature512(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+            return getSignature(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
         }
-        template <class Ty, unsigned int size, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature512(SHA512_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
-            Ty AlignedIn[round_up<2048>(size)] = { 0, };
-            memcpy((void*)AlignedIn, (void*)In  , sizeof(Ty));
-            return getSignature512(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+        template <class Ty, unsigned int size, unsigned szAligned = round_up<2048>(size)>
+        CRESULT getSignature(RSA2048_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
+            Ty AlignedIn[szAligned] = { 0, };
+            memcpy((void*)AlignedIn, (void*)In  , size);
+            return getSignature(SigOut, (void*)AlignedIn, sizeof(AlignedTy), PrvKey);
+        }
+
+        CRESULT proofSignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey);
+
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT proofSignature(RSA2048_t& Sig, Ty& In, RSA2048_t& PubKey) {
+            AlignedTy AlignedIn;
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
+            memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
+            return proofSignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
+        }
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT proofSignature(RSA2048_t& Sig, Ty* In, RSA2048_t& PubKey) {
+            AlignedTy AlignedIn;
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
+            memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
+            return proofSignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
+        }
+        template <class Ty, unsigned int size, unsigned szAligned = round_up<2048>(size)>
+        CRESULT proofSignature(RSA2048_t& Sig, Ty(&In)[size], RSA2048_t& PubKey) {
+            Ty AlignedIn[szAligned] = { 0, };
+            memcpy((void*)AlignedIn, (void*)In  , size);
+            return getSignature(Sig, (void*)AlignedIn, szAligned, PubKey);
         }
     };
 };
-
 #endif

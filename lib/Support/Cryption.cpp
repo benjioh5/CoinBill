@@ -67,7 +67,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getRSAPubDecrpyt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public) {
+    CRESULT Cryption::getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public) {
         RSA     *PubKey;
         void    *RawKey = Public;
 
@@ -85,41 +85,39 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getSignature256(SHA256_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
+    CRESULT Cryption::getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
         // szIn always have to be aligned as 2048 bits. 
         // we will return if its not rounded size.
         if (round_up<2048 / 8>(szIn) != szIn)
             // pIn isn't a aligned variable, align it first.
             return CRESULT::FAILED_NOT_ROUNDED;
 
-        // we need to create a temp variable, because before we hashing, signing it first.
-        void* pTempEncrypted = new char[szIn];
+        SHA512_t tempHash;
 
-        // now encrpyting / hashing.
-        getRSAPrvEncrypt(pTempEncrypted, pIn, szIn, PrvKey);
-        getSHA256Hash(SigOut, pTempEncrypted, szIn);
+        // now hashing, encrypting.
+        getSHA512Hash(tempHash, pIn, szIn);
+        getRSAPrvEncrypt(&SigOut, &tempHash, PrvKey);
+        
 
-        // deleting temp variable.
-        delete pTempEncrypted;
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getSignature512(SHA512_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
+    CRESULT Cryption::proofSignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey) {
         // szIn always have to be aligned as 2048 bits. 
         // we will return if its not rounded size.
         if (round_up<2048 / 8>(szIn) != szIn)
             // pIn isn't a aligned variable, align it first.
             return CRESULT::FAILED_NOT_ROUNDED;
 
-        // we need to create a temp variable, because before we hashing, signing it first.
-        void* pTempEncrypted    = new char[szIn];
+        SHA512_t tempHash;
+        SHA512_t tempSign;
 
-        // now encrpyting / hashing.
-        getRSAPrvEncrypt(pTempEncrypted, pIn, szIn, PrvKey);
-        getSHA512Hash(SigOut, pTempEncrypted, szIn);
+        // now hashing, decrypting.
+        getSHA512Hash(tempHash, pIn, szIn);         // get original hash by hashing pIn
+        getRSAPubDecrypt(&tempSign, &Sig, PubKey);  // get original hash by decrypting signature.
 
-        // deleting temp variable.
-        delete pTempEncrypted;
-        return CRESULT::SUCCESSED;
+        // tempSig will return original hash value.
+        // we are going to compare it.
+        return isSHA512HashEqual(tempHash, tempSign) ? CRESULT::SUCCESSED : CRESULT::INVALID_SIGNATURE;
     }
 }
