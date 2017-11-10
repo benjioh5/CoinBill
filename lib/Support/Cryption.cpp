@@ -14,16 +14,20 @@
 namespace CoinBill
 {
     void InitCryption() {
+        // Initializing all OpenSSL functions.
         ERR_load_crypto_strings();
         OpenSSL_add_all_algorithms();
     }
     void StopCryption() {
+        // Releasing / Cleanup all OpenSSL functions.
         EVP_cleanup();
         CRYPTO_cleanup_all_ex_data();
         ERR_free_strings();
     }
 
+    // TODO : is there are better way to check is equal using SIMD..
     bool Cryption::isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS) {
+        
         return LHS == RHS;
     }
     bool Cryption::isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS) {
@@ -43,8 +47,8 @@ namespace CoinBill
     CRESULT Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
         SHA512_CTX sha512;
         // Hash creation.
-        IF_FAILED_RET(SHA512_Init(&sha512), CRESULT::FAILED_INIT);
-        IF_FAILED_RET(SHA512_Update(&sha512, pIn, szIn), CRESULT::FAILED_UPDATE);
+        IF_FAILED_RET(SHA512_Init(&sha512)                          , CRESULT::FAILED_INIT  );
+        IF_FAILED_RET(SHA512_Update(&sha512, pIn, szIn)             , CRESULT::FAILED_UPDATE);
         IF_FAILED_RET(SHA512_Final(Out.toUint8(), &sha512)          , CRESULT::FAILED_UPDATE);
         return CRESULT::SUCCESSED;
     }
@@ -53,7 +57,14 @@ namespace CoinBill
         RSA     *PrvKey;
         void    *RawKey = Private;
 
+        // extract key from a buffer. 
+        // this will return the OpenSSL managed RSA key.
         d2i_RSAPrivateKey(&PrvKey, (const unsigned char**)&RawKey, Private.getSize());
+
+        // check the key valid.
+        if (RSA_check_key(PrvKey) != true)
+            // This is a invalid private key.
+            return CRESULT::INVALID_PRV_KEY;
 
         // Encrypting pIn(Signature)
         IF_FAILED_RET( RSA_private_encrypt(
@@ -71,7 +82,14 @@ namespace CoinBill
         RSA     *PubKey;
         void    *RawKey = Public;
 
+        // extract key from a buffer. 
+        // this will return the OpenSSL managed RSA key.
         d2i_RSAPublicKey(&PubKey, (const unsigned char**)&RawKey, Public.getSize());
+
+        // check the key valid.
+        if (RSA_check_key(PubKey) != true)
+            // This is a invalid public key.
+            return CRESULT::INVALID_PUB_KEY;
 
         // Decrypting pIn(Signature)
         IF_FAILED_RET(RSA_public_decrypt(

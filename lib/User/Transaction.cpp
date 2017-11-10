@@ -6,19 +6,24 @@
 
 namespace CoinBill {
     TransactionBase& TransactionNode::getTransaction() {
+        // returning the transaction now holding.
         return (*m_transaction);
     }
     TransactionNode& TransactionNode::getNextNode() {
+        // returning next trasaction node.
         return (*m_nextNode);
     }
     TransactionNode& TransactionNode::getPrevNode() {
+        // returning prev transaction node.
         return (*m_prevNode);
     }
 
     RSA2048_t& TransactionNode::getTransAuther() {
+        // returning auther of transaction.
         return m_TransAuther;
     }
     RSA2048_t& TransactionNode::getTransAutherSign() {
+        // returning auther signature of transaction.
         return m_TransAutherSign;
     }
 
@@ -29,6 +34,7 @@ namespace CoinBill {
     }
     bool TransactionNode::isNodeOwnerSame(Wallet* user) {
         // public key value of owner's account should same. 
+        // we cannot proof the signature if owner isn't same.
         return (user == m_creator) || (user->getPubKey() == getTransAuther());
     }
 
@@ -90,6 +96,7 @@ namespace CoinBill {
         // Signing a transaction.
         Cryption::getSignature<TransactionBase>(sign, transaction, user->getPrvKey());
 
+        // return signed signature.
         return sign;
     }
 }

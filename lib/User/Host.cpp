@@ -4,6 +4,9 @@
 
 namespace CoinBill
 {
+    // TODO_ALL : need to implements based on platform.
+    //            we do only support MSVC for now.
+
     uint64_t Host::getHostVersion() {
         // TODO : CMake based versioning.
         return 0;

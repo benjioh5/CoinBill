@@ -39,6 +39,8 @@ namespace CoinBill
         // This is very basic methods for cryption. 
         CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private);
         CRESULT getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
+
+        // Encrypt / Decrypt template binding.
         template <class InTy>
         CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA2048_t& Private) { 
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy), Private); 
@@ -81,6 +83,7 @@ namespace CoinBill
 
         CRESULT getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
 
+        // getSignature template binding / aligning.
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
         CRESULT getSignature(RSA2048_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
             AlignedTy AlignedIn;
@@ -104,6 +107,7 @@ namespace CoinBill
 
         CRESULT proofSignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey);
 
+        // proof signature template binding / aligning.
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
         CRESULT proofSignature(RSA2048_t& Sig, Ty& In, RSA2048_t& PubKey) {
             AlignedTy AlignedIn;

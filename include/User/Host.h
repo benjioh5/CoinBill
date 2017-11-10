@@ -9,6 +9,8 @@ namespace CoinBill
     class Host
     {
     public:
+        // TODO : implemnt notify methods based on P2P network.
+        //        so that we can send / share objects on other peers.
         void notifyNewContract();
         void notifyNewWallet();
         void notifyNewTransaction();

@@ -10,14 +10,18 @@ namespace CoinBill
     // We use SHA-512 to hash block.
     BlockV1* refreshBlockHash(BlockV1* block, uint32_t cycle) {
         // Nothing to hash...
-        if (cycle == 0) return nullptr;
+        if (cycle == 0) 
+            return nullptr;
 
         // Reset hash.
         SHA512_t &curHash = block->m_HeaderHash; 
         curHash = 0;
 
         // Prehash header.
-        Cryption::getSHA512Hash(curHash, &block->m_Header);
+        if(Cryption::getSHA512Hash(curHash, &block->m_Header) != CRESULT::SUCCESSED)
+            // Pre hashing a block header fails, we do not try hashing the pre hashed value.
+            // maybe block header currupted...
+            return nullptr;
 
         // Starting i with 1, because we prehashed it.
         // if it has 1 cycle will pass this job.
@@ -27,6 +31,7 @@ namespace CoinBill
         return block;
     }
 
+    // Creating a new block based on user, previus block.
     BlockV1* createNewBlock(Wallet* user, BlockV1* prev) {
         bool            newDifficultyTriggered  = false;
 
@@ -54,22 +59,25 @@ namespace CoinBill
         blockHeader.m_CoinUsed      = 0;
         blockHeader.m_Nonce         = 0;
 
+        // Try refreshing block hash, we updated block header.
         return refreshBlockHash(block, Host::getHashCycle());
     }
 
     BlockV1* refreshBlockNonce(BlockV1* block, bool rehash) {
         block->m_Header.m_Nonce++;
 
+        // hash if rehash is true
         return rehash ? refreshBlockHash(block, Host::getHashCycle()) : block;
     }
 
     BlockV1* refreshBlockInfo(BlockV1* block, bool rehash) {
-        BlockHeaderV1&  blockHeader = block->m_Header;
+        BlockHeaderV1& blockHeader = block->m_Header;
 
         // Just refreshing time and versions.
         blockHeader.m_Version       = Host::getHostVersion();
         blockHeader.m_TimeStamp     = Host::getHostTime();
 
+        // hash if rehash is true
         return rehash ? refreshBlockHash(block, Host::getHashCycle()) : block;
     }
 }
