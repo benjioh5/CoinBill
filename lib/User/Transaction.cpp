@@ -54,6 +54,8 @@ namespace CoinBill {
 
     bool TransactionNode::RefreshNodeData() {
         getTransaction().m_TransTime = Host::getHostTime();
+
+        return true;
     }
 
     bool TransactionNode::RefreshNodeSign(Wallet* user) {
