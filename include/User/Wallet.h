@@ -6,13 +6,27 @@
 
 namespace CoinBill
 {
-    class Wallet
+    class WalletData
     {
     public:
-        SHA256_t m_Owner;
-        SHA512_t m_Block;
+        RSA2048_t m_PubKey;
+        RSA2048_t m_PrvKey;
 
-        uint64_t m_Balance;
+        SHA512_t m_Block;
+        uint64_t m_Money;
+    };
+
+    class Wallet
+    {
+        WalletData* m_data;
+
+    public:
+        RSA2048_t& getPubKey() const;
+        RSA2048_t& getPrvKey() const;
+        RSA2048_t& getOwner() const;
+
+        SHA512_t& getWalletBlock() const;
+        uint64_t getWalletCoin() const;
     };
 }
 

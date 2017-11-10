@@ -1,31 +1,36 @@
 #include <User/Transaction.h>
 #include <User/Host.h>
+#include <User/Wallet.h>
+
+#include <Support/Cryption.h>
 
 namespace CoinBill {
-    TransactionBase* TransactionNode::getTransaction() {
-        return m_transaction;
+    TransactionBase& TransactionNode::getTransaction() {
+        return (*m_transaction);
     }
-    TransactionNode* TransactionNode::getNextNode() {
-        return m_nextNode;
+    TransactionNode& TransactionNode::getNextNode() {
+        return (*m_nextNode);
     }
-    TransactionNode* TransactionNode::getPrevNode() {
-        return m_prevNode;
+    TransactionNode& TransactionNode::getPrevNode() {
+        return (*m_prevNode);
     }
 
     bool TransactionNode::isNodeHasSign() {
-        return !(getTransaction()->m_TransSign).isEmpty();
+        // Empty sign mean that never initialized transaction sign.
+        // we will return false if its empty. not signed.
+        return !(getTransAutherSign().isEmpty());
     }
     bool TransactionNode::isNodeOwnerSame(Wallet* user) {
-        // TODO : implement wallet first.
-        return true;
+        // public key value of owner's account should same. 
+        return user->getPubKey() == getTransAuther();
     }
 
     bool TransactionNode::isNodeCoinTransferType() {
-        return getTransaction()->m_TransType == TransactionType::COIN_TRANSFER;
+        return getTransaction().m_TransType == TransactionType::COIN_TRANSFER;
     }
 
     bool TransactionNode::isNodeCoinReward() {
-        return getTransaction()->m_TransType == TransactionType::COIN_REWARD;
+        return getTransaction().m_TransType == TransactionType::COIN_REWARD;
     }
 
     bool TransactionNode::isNodeSignatureValid() {
@@ -34,12 +39,19 @@ namespace CoinBill {
     }
 
     void TransactionNode::RefreshNodeData() {
-        TransactionBase* transaction = getTransaction();
-
-        transaction->m_TransTime = Host::getHostTime();
+        getTransaction().m_TransTime = Host::getHostTime();
     }
 
     void TransactionNode::RefreshNodeSign(Wallet* user) {
-        // TODO : implement wallet first.
+        getTransaction().m_TransAutherSign = signTransaction(getTransaction(), user);
+    }
+
+    SHA256_t signTransaction(TransactionBase& transaction, Wallet* user) {
+        SHA256_t sign = 0;
+
+        // You cannot sign without your private key.
+        // this wallet is currupted, returning a empty sign.
+        if (user->getPrvKey().isEmpty())
+            return sign;
     }
 }
