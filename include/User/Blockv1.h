@@ -10,7 +10,7 @@ namespace CoinBill
     {
     
         SHA512_t    m_PrevHash;
-        SHA256_t    m_Auther;
+        RSA2048_t   m_Auther;
 
         uint64_t    m_Version;
         uint64_t    m_TimeStamp;

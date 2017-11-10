@@ -53,5 +53,9 @@ namespace CoinBill {
         // this wallet is currupted, returning a empty sign.
         if (user->getPrvKey().isEmpty())
             return sign;
+
+        // Signing a transaction.
+        Cryption::getSignature256<TransactionBase>(sign, transaction, user->getPrvKey());
+        return sign;
     }
 }

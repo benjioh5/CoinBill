@@ -3,8 +3,10 @@
 #ifdef COINBILL_USE_BOOST_ASIO
 #include <boost/asio.hpp>
 #elif COINBILL_WINDOWS
-#include <Windows.h>
 #include <WinSock2.h>
+#pragma comment(lib, "ws2_32.lib")
+#pragma warning(push)
+#pragma warning(disable:4996)
 #endif
 
 namespace CoinBill
@@ -168,3 +170,10 @@ namespace CoinBill
         }
     }
 }
+
+
+#ifdef COINBILL_WINDOWS
+#ifndef COINBILL_USE_BOOST_ASIO
+#pragma warning(pop)
+#endif
+#endif

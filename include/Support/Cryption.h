@@ -9,13 +9,14 @@
 
 #include <vector>
 #include <Support/Types.h>
+#include <Support/Basic.h>
 
 namespace CoinBill
 {
     void InitCryption();
     void StopCryption();
 
-    enum class CRESULT {
+    enum CRESULT {
         SUCCESSED                           = 0x00,
         FAILED_UNKNOWN                      = 0xFF,
 
@@ -24,6 +25,7 @@ namespace CoinBill
         FAILED_FINAL                        = 0x03,
         FAILED_ENCRYPT                      = 0x04,
         FAILED_DECRYPT                      = 0x05,
+        FAILED_NOT_ROUNDED                  = 0x06,
 
         INVALID_PUB_KEY                     = 0x11,
         INVALID_PRV_KEY                     = 0x12
@@ -75,6 +77,50 @@ namespace CoinBill
 
         bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
         bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
+
+        CRESULT getSignature256(SHA256_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
+        CRESULT getSignature512(SHA512_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
+
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT getSignature256(SHA256_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
+            AlignedTy AlignedIn; 
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy) );
+            memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty)        );
+            return getSignature256(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
+        }
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT getSignature256(SHA256_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
+            AlignedTy AlignedIn;
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy) );
+            memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty)        );
+            return getSignature256(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+        }
+        template <class Ty, unsigned int size>
+        CRESULT getSignature256(SHA256_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
+            Ty AlignedIn[round_up<2048>(size)] = { 0, };
+            memcpy((void*) AlignedIn, (void*)In , sizeof(Ty));
+            return getSignature256(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+        }
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT getSignature512(SHA512_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
+            AlignedTy AlignedIn;
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
+            memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
+            return getSignature512(SigOut, (void*)&In, sizeof(AlignedTy), PrvKey);
+        }
+        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT getSignature512(SHA512_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
+            AlignedTy AlignedIn;
+            memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
+            memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
+            return getSignature512(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+        }
+        template <class Ty, unsigned int size, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
+        CRESULT getSignature512(SHA512_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
+            Ty AlignedIn[round_up<2048>(size)] = { 0, };
+            memcpy((void*)AlignedIn, (void*)In  , sizeof(Ty));
+            return getSignature512(SigOut, (void*)In, sizeof(AlignedTy), PrvKey);
+        }
     };
 };
 

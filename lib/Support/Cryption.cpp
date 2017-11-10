@@ -34,18 +34,18 @@ namespace CoinBill
     CRESULT Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
         SHA256_CTX sha256;
         // Hash creation.
-        IF_FAILED(SHA256_Init(&sha256)                          , CRESULT::FAILED_INIT  );
-        IF_FAILED(SHA256_Update(&sha256, pIn, szIn)             , CRESULT::FAILED_UPDATE);
-        IF_FAILED(SHA256_Final(Out.toUint8(), &sha256)          , CRESULT::FAILED_UPDATE);
+        IF_FAILED_RET(SHA256_Init(&sha256)                          , CRESULT::FAILED_INIT  );
+        IF_FAILED_RET(SHA256_Update(&sha256, pIn, szIn)             , CRESULT::FAILED_UPDATE);
+        IF_FAILED_RET(SHA256_Final(Out.toUint8(), &sha256)          , CRESULT::FAILED_UPDATE);
         return CRESULT::SUCCESSED;
     }
 
     CRESULT Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
         SHA512_CTX sha512;
         // Hash creation.
-        IF_FAILED(SHA512_Init(&sha512)                          , CRESULT::FAILED_INIT  );
-        IF_FAILED(SHA512_Update(&sha512, pIn, szIn)             , CRESULT::FAILED_UPDATE);
-        IF_FAILED(SHA512_Final(Out.toUint8(), &sha512)          , CRESULT::FAILED_UPDATE);
+        IF_FAILED_RET(SHA512_Init(&sha512), CRESULT::FAILED_INIT);
+        IF_FAILED_RET(SHA512_Update(&sha512, pIn, szIn), CRESULT::FAILED_UPDATE);
+        IF_FAILED_RET(SHA512_Final(Out.toUint8(), &sha512)          , CRESULT::FAILED_UPDATE);
         return CRESULT::SUCCESSED;
     }
 
@@ -56,7 +56,7 @@ namespace CoinBill
         d2i_RSAPrivateKey(&PrvKey, (const unsigned char**)&RawKey, Private.getSize());
 
         // Encrypting pIn(Signature)
-        IF_FAILED( RSA_private_encrypt(
+        IF_FAILED_RET( RSA_private_encrypt(
             szIn,                   // Signature Size.
             (unsigned char*)pIn,    // Signature Buffer.
             (unsigned char*)pOut,   // Output.
@@ -74,7 +74,7 @@ namespace CoinBill
         d2i_RSAPublicKey(&PubKey, (const unsigned char**)&RawKey, Public.getSize());
 
         // Decrypting pIn(Signature)
-        IF_FAILED(RSA_public_decrypt(
+        IF_FAILED_RET(RSA_public_decrypt(
             szIn,                   // Signature Size.
             (unsigned char*)pIn,    // Signature Buffer.
             (unsigned char*)pOut,   // Output.
@@ -82,6 +82,44 @@ namespace CoinBill
             RSA_PKCS1_PADDING       // Signature Padding.
         ), CRESULT::FAILED_DECRYPT);
 
+        return CRESULT::SUCCESSED;
+    }
+
+    CRESULT Cryption::getSignature256(SHA256_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
+        // szIn always have to be aligned as 2048 bits. 
+        // we will return if its not rounded size.
+        if (round_up<2048 / 8>(szIn) != szIn)
+            // pIn isn't a aligned variable, align it first.
+            return CRESULT::FAILED_NOT_ROUNDED;
+
+        // we need to create a temp variable, because before we hashing, signing it first.
+        void* pTempEncrypted = new char[szIn];
+
+        // now encrpyting / hashing.
+        getRSAPrvEncrypt(pTempEncrypted, pIn, szIn, PrvKey);
+        getSHA256Hash(SigOut, pTempEncrypted, szIn);
+
+        // deleting temp variable.
+        delete pTempEncrypted;
+        return CRESULT::SUCCESSED;
+    }
+
+    CRESULT Cryption::getSignature512(SHA512_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
+        // szIn always have to be aligned as 2048 bits. 
+        // we will return if its not rounded size.
+        if (round_up<2048 / 8>(szIn) != szIn)
+            // pIn isn't a aligned variable, align it first.
+            return CRESULT::FAILED_NOT_ROUNDED;
+
+        // we need to create a temp variable, because before we hashing, signing it first.
+        void* pTempEncrypted    = new char[szIn];
+
+        // now encrpyting / hashing.
+        getRSAPrvEncrypt(pTempEncrypted, pIn, szIn, PrvKey);
+        getSHA512Hash(SigOut, pTempEncrypted, szIn);
+
+        // deleting temp variable.
+        delete pTempEncrypted;
         return CRESULT::SUCCESSED;
     }
 }

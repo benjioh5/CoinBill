@@ -47,7 +47,7 @@ namespace CoinBill
         blockHeader.m_Number        = prev->m_Header.m_Number + 1;
 
         // Auther of new block. it is Wallet that we are trying to make this block.
-        blockHeader.m_Auther        = user->m_Owner;
+        blockHeader.m_Auther        = user->getOwner();
         blockHeader.m_Version       = Host::getHostVersion();
         blockHeader.m_TimeStamp     = Host::getHostTime();
         blockHeader.m_CoinLimit     = 0; // TODO : determine coin limit.

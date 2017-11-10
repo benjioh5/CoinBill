@@ -21,9 +21,6 @@ namespace CoinBill
         // Time that created transaction.
         // This will be a posix time.
         uint64_t            m_TransTime;
-    protected:
-        TransactionBase();
-        ~TransactionBase();
     };
 
     class TransactionNode 
@@ -53,7 +50,8 @@ namespace CoinBill
         void RefreshNodeSign(Wallet* user);
     };
 
-    SHA256_t signTransaction(TransactionBase* transaction, Wallet* user);
+    SHA256_t signTransaction(TransactionBase& transaction, Wallet* user);
+    SHA256_t proofTransaction(TransactionBase& transaction, Wallet* user);
 }
 
 #endif

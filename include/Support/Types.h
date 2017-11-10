@@ -1,6 +1,7 @@
 #ifndef COINBILL_SUPPORT_BIG_INT
 #define COINBILL_SUPPORT_BIG_INT
 
+#include <type_traits>
 #include <stdint.h>
 #include <Support/Basic.h>
 
@@ -135,18 +136,6 @@ namespace CoinBill
     typedef uint2048_t                                              RSA2048_t;
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
-
-    template <class Alignee, size_t szAlign>
-    struct AlignedType {
-        typedef alignas(szAlign)Alignee Type;
-    };
-    template <class Alignee, class Aligner, size_t szAlign = sizeof(Aligner)>
-    class AlignedType {
-        typedef AlignedType<Alignee, szAlign>::Type Type;
-    };
-
-    template <class Ty>
-    using RSABlock = AlignedType<Ty, RSA2048_t>::Type;
 }
 
 #endif
