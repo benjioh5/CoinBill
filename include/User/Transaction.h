@@ -9,27 +9,37 @@ namespace CoinBill
 
     enum TransactionType {
         COIN_REWARD,
-        COIN_TRANSFER,
+        COIN_SEND,
     };
 
-    struct TransactionBase
-    {
-        TransactionType     m_TransType;
-        RSA2048_t           m_TransAutherSign;
-        RSA2048_t           m_TransAuther;
-        
+    struct TransactionBase {
+        TransactionType     m_Type;
+        uint64_t            m_Version;
         // Time that created transaction.
         // This will be a posix time.
-        uint64_t            m_Version;
         uint64_t            m_Time;
+        // block that this transaction created.
+        SHA512_t            m_Block;
     };
 
-    class TransactionNode 
-    {
-    protected:
-        bool m_isNodeHasSign;
+    struct TransactionReward : public TransactionBase {
+        SHA512_t            m_BlockMined;
+        uint64_t            m_CoinReward;
+    };
+    struct TransactionSend : public TransactionBase {
+        RSA2048_t           m_TransferTo;
+        uint64_t            m_CoinSent;
+    };
 
+    class TransactionNode final
+    {
+        Wallet*          m_creator;
+
+    protected:
         TransactionBase* m_transaction;
+        RSA2048_t        m_TransAuther;
+        RSA2048_t        m_TransAutherSign;
+
         TransactionNode* m_prevNode;
         TransactionNode* m_nextNode;
 
@@ -48,6 +58,7 @@ namespace CoinBill
         bool isNodeSignatureValid();
 
         bool RefreshNodeData();
+        bool RefreshNodeSign();
         bool RefreshNodeSign(Wallet* user);
     };
 

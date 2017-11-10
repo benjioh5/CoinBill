@@ -16,10 +16,10 @@ namespace CoinBill {
     }
 
     RSA2048_t& TransactionNode::getTransAuther() {
-        return getTransaction().m_TransAuther;
+        return m_TransAuther;
     }
     RSA2048_t& TransactionNode::getTransAutherSign() {
-        return getTransaction().m_TransAutherSign;
+        return m_TransAutherSign;
     }
 
     bool TransactionNode::isNodeHasSign() {
@@ -29,15 +29,15 @@ namespace CoinBill {
     }
     bool TransactionNode::isNodeOwnerSame(Wallet* user) {
         // public key value of owner's account should same. 
-        return user->getPubKey() == getTransAuther();
+        return (user == m_creator) || (user->getPubKey() == getTransAuther());
     }
 
     bool TransactionNode::isNodeCoinTransferType() {
-        return getTransaction().m_TransType == TransactionType::COIN_TRANSFER;
+        return getTransaction().m_Type == TransactionType::COIN_SEND;
     }
 
     bool TransactionNode::isNodeCoinReward() {
-        return getTransaction().m_TransType == TransactionType::COIN_REWARD;
+        return getTransaction().m_Type == TransactionType::COIN_REWARD;
     }
 
     bool TransactionNode::isNodeSignatureValid() {
@@ -59,6 +59,10 @@ namespace CoinBill {
         return true;
     }
 
+    bool TransactionNode::RefreshNodeSign() {
+        return RefreshNodeSign(m_creator);
+    }
+
     bool TransactionNode::RefreshNodeSign(Wallet* user) {
         // Try signing it.
         RSA2048_t sign = encryptTransaction(getTransaction(), user);
@@ -68,9 +72,10 @@ namespace CoinBill {
             return false;
 
         // use this sign.
-        getTransaction().m_TransAutherSign  = sign;
-        getTransaction().m_TransAuther      = user->getPubKey();
-
+        m_creator           = user;
+        m_TransAutherSign   = sign;
+        m_TransAuther       = user->getPubKey();
+        
         return true;
     }
 
