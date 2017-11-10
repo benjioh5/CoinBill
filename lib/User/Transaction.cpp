@@ -53,7 +53,8 @@ namespace CoinBill {
     }
 
     bool TransactionNode::RefreshNodeData() {
-        getTransaction().m_TransTime = Host::getHostTime();
+        getTransaction().m_Version  = Host::getHostVersion();
+        getTransaction().m_Time     = Host::getHostTime();
 
         return true;
     }

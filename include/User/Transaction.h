@@ -20,7 +20,8 @@ namespace CoinBill
         
         // Time that created transaction.
         // This will be a posix time.
-        uint64_t            m_TransTime;
+        uint64_t            m_Version;
+        uint64_t            m_Time;
     };
 
     class TransactionNode 

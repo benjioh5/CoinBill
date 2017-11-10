@@ -8,7 +8,6 @@ namespace CoinBill
     class Wallet;
     struct BlockHeaderV1
     {
-    
         SHA512_t    m_PrevHash;
         RSA2048_t   m_Auther;
 
