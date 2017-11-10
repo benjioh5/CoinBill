@@ -4,4 +4,5 @@ AddCoinbill_Lib(CoinBillSupport
     ${COINBILL_INC_DIR}/Support/Basic.h
     ${COINBILL_INC_DIR}/Support/Types.h
     ${COINBILL_INC_DIR}/Support/Cryption.h
+    ${COINBILL_INC_DIR}/Support/Logger.h
 )

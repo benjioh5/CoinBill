@@ -62,7 +62,7 @@ namespace CoinBill
         d2i_RSAPrivateKey(&PrvKey, (const unsigned char**)&RawKey, Private.getSize());
 
         // check the key valid.
-        if (RSA_check_key(PrvKey) != true)
+        if (!!RSA_check_key(PrvKey) != true)
             // This is a invalid private key.
             return CRESULT::INVALID_PRV_KEY;
 
@@ -87,7 +87,7 @@ namespace CoinBill
         d2i_RSAPublicKey(&PubKey, (const unsigned char**)&RawKey, Public.getSize());
 
         // check the key valid.
-        if (RSA_check_key(PubKey) != true)
+        if (!!RSA_check_key(PubKey) != true)
             // This is a invalid public key.
             return CRESULT::INVALID_PUB_KEY;
 
