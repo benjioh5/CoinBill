@@ -18,7 +18,7 @@ namespace CoinBill
         // NOTE : DO NOT CREATE ANY VIRTUAL METHODS, OR ANY OTHER VARIABLES.
         //        THIS IS FOR STORING RAW BIG INT VARIABLES.
     protected:
-        typedef BigTypeBase<size, BaseTy> MTy;
+        using MTy = BigTypeBase<size, BaseTy>;
         BaseTy data[size];
 
         void ZeroFill();
@@ -169,6 +169,10 @@ namespace CoinBill
     //          |   - set values empty.                                                                                 |
     //          |                                                                                                       |
     //      ----=========================================================================================================----
+    //          | Ty& operator=(Ty&)                                                                                    |
+    //          |   - copy values.                                                                                      |
+    //          |                                                                                                       |
+    //      ----=========================================================================================================----
     //
     //
     template <>
@@ -275,7 +279,6 @@ namespace CoinBill
         for (unsigned int i = 0; i < vi; ++i) {
             vl[i] = vr[i];
         }
-        
         return *this;
     }
 #endif
