@@ -26,11 +26,11 @@ namespace CoinBill
         WalletData* m_data;
 
     public:
-        RSA4096_t& getPubKey() const;
-        RSA4096_t& getPrvKey() const;
-        SHA256_t& getAccount();
-        SHA512_t& getWalletBlock() const;
-        uint64_t getWalletCoin() const;
+        RSA4096_t&  getPubKey() const;
+        RSA4096_t&  getPrvKey() const;
+        SHA256_t&   getAccount();
+        SHA512_t&   getWalletBlock() const;
+        uint64_t    getWalletCoin() const;
         WalletData* getWalletData() const;
 
         bool refreshAccount();

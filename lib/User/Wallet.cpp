@@ -80,6 +80,10 @@ namespace CoinBill
         return nullptr;
     }
     Wallet* createAccount(RSA* Key) {
+        RSA4096_t PubKey;
+        RSA4096_t PrvKey;
+
+
         return nullptr;
     }
     Wallet* createAccountPrv(RSA4096_t& PrvKey) {
