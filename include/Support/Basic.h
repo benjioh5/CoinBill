@@ -1,9 +1,9 @@
 #ifndef COINBILL_SUPPORT_BASIC
 #define COINBILL_SUPPORT_BASIC
 
-#define IF_FAILED(xv, y)                        if(!xv)                         t
-#define IF_FAILED_RET(xv, y)                    if(!xv)                         return y;
-#define IF_FAILED_GOTO(xv, y)                   if(!xv)                         goto y;
+#define IF_FAILED(xv, y)                        if(!xv)                t
+#define IF_FAILED_RET(xv, y)                    if(!xv)                return y;
+#define IF_FAILED_GOTO(xv, y)                   if(!xv)                goto y;
 
 #if defined(_MSC_VER)
 #define ALIGNED_(x) __declspec(align(x))

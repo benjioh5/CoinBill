@@ -56,7 +56,7 @@ namespace CoinBill {
 
         return (Cryption::verifySignature(
             getTransAutherSign()    ,   // Transaction Auther Signature.
-            getHead()        ,   // Transaction.
+            getHead()               ,   // Transaction.
             getTransAuther())           // Transaction Auther.
         != CRESULT::SUCCESSED);
     }
@@ -82,7 +82,7 @@ namespace CoinBill {
 
         // use this sign.
         m_creator           = user;
-        m_TransSignature   = sign;
+        m_TransSignature    = sign;
         m_TransAuther       = user->getPubKey();
         
         return true;
