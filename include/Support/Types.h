@@ -21,7 +21,6 @@ namespace CoinBill
         typedef BigTypeBase<size, BaseTy> MTy;
         BaseTy data[size];
 
-        // I think... we can make this lot more faster tho.
         void ZeroFill();
 
         void increasePos(unsigned int index, BaseTy val) {
@@ -69,9 +68,11 @@ namespace CoinBill
             decreasePos(0, (BaseTy)val); 
             return *this;
         }
-        template <class OTy> inline MTy& operator=(OTy val) { 
+
+        template <class OTy> inline MTy& operator=(OTy val) {
             ZeroFill();
-            data[0] = (BaseTy)val;
+            OTy* v = toType<OTy>();
+            *v = (OTy)val;
             return *this;
         }
 
@@ -108,6 +109,10 @@ namespace CoinBill
             ZeroFill();
             Ty* VTy = toType<Ty>();
             *VTy = Init;
+        }
+
+        BigTypeBase(const MTy& Init) {
+            *this = Init;
         }
 
         // default type constructor / distructor.
@@ -237,6 +242,41 @@ namespace CoinBill
         for (unsigned int i = 0; i < vi; ++i) {
             vo[i] = vz;
         }
+    }
+
+    template<>
+    template<>
+    inline uint256_t& uint256_t::operator=<uint256_t&>(uint256_t& val) {
+        __m256i* vl = toType<__m256i>();
+        __m256i* vr = val.toType<__m256i>();
+
+        *vl = *vr;
+        return *this;
+    }
+
+    template<>
+    template<>
+    inline uint512_t& uint512_t::operator=<uint512_t&>(uint512_t& val) {
+        __m256i* vl = toType<__m256i>();
+        __m256i* vr = val.toType<__m256i>();
+
+        vl[0] = vr[0];
+        vl[1] = vr[1];
+        return *this;
+    }
+
+    template<>
+    template<>
+    inline uint2048_t& uint2048_t::operator=<uint2048_t&>(uint2048_t& val) {
+        unsigned int vi;
+        __m256i* vl = toType<__m256i>(vi);
+        __m256i* vr = val.toType<__m256i>();
+
+        for (unsigned int i = 0; i < vi; ++i) {
+            vl[i] = vr[i];
+        }
+        
+        return *this;
     }
 #endif
 }
