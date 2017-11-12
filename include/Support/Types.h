@@ -177,7 +177,7 @@ namespace CoinBill
         // check zero flag from simd register.
         // _mm256_testz_si256(v, v) => 
         //      (v[255:0] & v[255:0] == 0) return 1;
-        return _mm256_testz_si256(v, v) == 1;
+        return !!_mm256_testz_si256(v, v);
     }
 
     template<>
@@ -191,7 +191,7 @@ namespace CoinBill
 
         // check zero flag from simd register.
         __m256i result = _mm256_or_si256(v1, v2);
-        return _mm256_testz_si256(result, result);
+        return !!_mm256_testz_si256(result, result);
     }
 
     template<>
