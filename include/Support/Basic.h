@@ -5,9 +5,17 @@
 #define IF_FAILED_RET(xv, y)                    if(!xv)                         return y;
 #define IF_FAILED_GOTO(xv, y)                   if(!xv)                         goto y;
 
-#define ALIGN_V(ty, val)                        __declspec(align(val))          ty
-#define ALIGN_V_TYP(ty, typ)                    __declspec(align(sizeof(typ))   ty
-#define ALIGN_V_BIT(ty, bit)                    __declspec(align(bit / 8))      ty
+#if defined(_MSC_VER)
+#define ALIGNED_(x) __declspec(align(x))
+#else
+#if defined(__GNUC__)
+#define ALIGNED_(x) __attribute__ ((aligned(x)))
+#endif
+#endif
+
+#define ALIGN_V(ty, val)                        ALIGNED_(val)          ty
+#define ALIGN_V_TYP(ty, typ)                    ALIGNED_(sizeof(typ)   ty
+#define ALIGN_V_BIT(ty, bit)                    ALIGNED_(bit / 8)      ty
 
 namespace CoinBill
 {
