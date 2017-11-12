@@ -13,11 +13,11 @@ namespace CoinBill
     {
     public:
         
-        RSA4096_t m_PubKey;
-        RSA4096_t m_PrvKey;
+        RSA4096_t   m_PubKey;
+        RSA4096_t   m_PrvKey;
 
-        SHA512_t m_Block;
-        uint64_t m_Money;
+        SHA512_t    m_Block;
+        uint64_t    m_Money;
     };
 
     class Wallet
@@ -26,9 +26,10 @@ namespace CoinBill
         WalletData* m_data;
 
     public:
+        SHA256_t&   getAccount();
         RSA4096_t&  getPubKey() const;
         RSA4096_t&  getPrvKey() const;
-        SHA256_t&   getAccount();
+        
         SHA512_t&   getWalletBlock() const;
         uint64_t    getWalletCoin() const;
         WalletData* getWalletData() const;
