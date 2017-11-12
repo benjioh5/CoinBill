@@ -22,9 +22,7 @@ namespace CoinBill
         BaseTy data[size];
 
         // I think... we can make this lot more faster tho.
-        void ZeroFill() {
-            for (unsigned int i = 0; i < size; ++i) data[i] = 0;
-        }
+        void ZeroFill();
 
         void increasePos(unsigned int index, BaseTy val) {
             // If overflow.
@@ -144,20 +142,28 @@ namespace CoinBill
         return true;
     }
 
+    template <unsigned int size, class BaseTy, BaseTy maxSize>
+    inline void BigTypeBase<size, BaseTy, maxSize>::ZeroFill() {
+        for (unsigned int i = 0; i < size; ++i) data[i] = 0;
+    }
+
 #ifdef COINBILL_USE_SIMD
-    //      ----======================================================================================================----
-    //          |        SIMD Implements With Template Specalization.          using SIMD for betterf performance.   |
-    //      ----======================================================================================================----
-    //          | Targets                                                    |                                       |
-    //          |    - uint2048_t                                            | RSA2048_t                             |
-    //          |    - uint128_t                                             |                                       |
-    //          |    - uint256_t                                             | SHA256_t                              |
-    //          |    - uint512_t                                             | SHA512_t                              |
-    //      ----======================================================================================================----
-    //          | bool isEmpty()                                                                                     |
-    //          |    - empty check for value.                                                                        |
-    //          |                                                                                                    |
-    //      ----======================================================================================================----
+    //      ----=========================================================================================================----
+    //          |        SIMD Implements With Template Specalization.          using SIMD for betterf performance.      |
+    //      ----=========================================================================================================----
+    //          | Targets                                                   |                                           |
+    //          |   - uint2048_t                                            | RSA2048_t                                 |
+    //          |   - uint256_t                                             | SHA256_t                                  |
+    //          |   - uint512_t                                             | SHA512_t                                  |
+    //      ----=========================================================================================================----
+    //          | bool isEmpty()                                                                                        |
+    //          |   - empty check for value.                                                                            |
+    //          |                                                                                                       |
+    //      ----=========================================================================================================----
+    //          | void ZeroFill()                                                                                       |
+    //          |   - set values empty.                                                                                 |
+    //          |                                                                                                       |
+    //      ----=========================================================================================================----
     //
     //
     template <>
@@ -201,6 +207,36 @@ namespace CoinBill
             no_zf_stood |= _mm256_testz_si256(v, v) != 1;
         }
         return !no_zf_stood;
+    }
+
+    template<>
+    inline void uint256_t::ZeroFill() {
+        // Load to register.
+        __m256i* vo = toType<__m256i>();
+        // Store a zero value.
+        *vo = _mm256_setzero_si256();
+    }
+
+    template<>
+    inline void uint512_t::ZeroFill() {
+        // Load to register.
+        __m256i* vo = toType<__m256i>();
+        const __m256i vz = _mm256_setzero_si256();
+        // Store a zero value.
+        vo[0] = vz;
+        vo[1] = vz;
+    }
+
+    template<>
+    inline void uint2048_t::ZeroFill() {
+        // Load to register.
+        unsigned int vi;
+        __m256i* vo = toType<__m256i>(vi);
+
+        const __m256i vz = _mm256_setzero_si256();
+        for (unsigned int i = 0; i < vi; ++i) {
+            vo[i] = vz;
+        }
     }
 #endif
 }
