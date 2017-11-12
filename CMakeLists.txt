@@ -43,6 +43,11 @@ if(Boost_FOUND)
     endif()
 endif()
 
+option(USE_SIMD_INSTRUCTIONS "User SIMD for better performance" TRUE)
+if(USE_SIMD_INSTRUCTIONS)
+    list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_USE_SIMD)
+endif()
+
 # Add and initialize subdirectories.
 add_subdirectory(${COINBILL_LIB_DIR}/Network/)
 add_subdirectory(${COINBILL_LIB_DIR}/Support/)

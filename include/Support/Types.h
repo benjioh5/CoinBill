@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include <Support/Basic.h>
 
+#ifdef COINBILL_USE_SIMD
+#include <immintrin.h>
+#endif
+
 namespace CoinBill
 {
     
@@ -81,11 +85,11 @@ namespace CoinBill
         size_t getSize() { return sizeof(BaseTy) * size; }
 
         template <class Ty, unsigned int szToTy = (sizeof(BaseTy) * size) / sizeof(Ty)>
-        Ty* toType(unsigned int& _size) {
+        constexpr Ty* toType(unsigned int& _size) {
             _size = szToTy; return (Ty*)data;
         }
         template <class Ty>
-        Ty* toType() {
+        constexpr Ty* toType() {
             return (Ty*)data;
         }
 
@@ -98,13 +102,7 @@ namespace CoinBill
             }
         }
 
-        bool isEmpty() {
-            for (unsigned int i = 0; i < size; ++i)
-                if (data[i] != 0)
-                    return false;
-
-            return true;
-        }
+        bool isEmpty();
 
         // custom type constructor.
         template<class Ty>
@@ -113,6 +111,7 @@ namespace CoinBill
             Ty* VTy = toType<Ty>();
             *VTy = Init;
         }
+
         // default type constructor / distructor.
         BigTypeBase() = default;
         ~BigTypeBase() = default;
@@ -136,6 +135,74 @@ namespace CoinBill
     typedef uint2048_t                                              RSA2048_t;
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
+
+    template <unsigned int size, class BaseTy, BaseTy maxSize>
+    inline bool BigTypeBase<size, BaseTy, maxSize>::isEmpty() {
+        for (unsigned int i = 0; i < size; ++i)
+            if (data[i] != 0)
+                return false;
+        return true;
+    }
+
+#ifdef COINBILL_USE_SIMD
+    //      ----======================================================================================================----
+    //          |        SIMD Implements With Template Specalization.          using SIMD for betterf performance.   |
+    //      ----======================================================================================================----
+    //          | Targets                                                    |                                       |
+    //          |    - uint2048_t                                            | RSA2048_t                             |
+    //          |    - uint128_t                                             |                                       |
+    //          |    - uint256_t                                             | SHA256_t                              |
+    //          |    - uint512_t                                             | SHA512_t                              |
+    //      ----======================================================================================================----
+    //          | bool isEmpty()                                                                                     |
+    //          |    - empty check for value.                                                                        |
+    //          |                                                                                                    |
+    //      ----======================================================================================================----
+    //
+    //
+    template <>
+    inline bool uint256_t::isEmpty() {
+        // Load to register.
+        __m256i v = _mm256_load_si256(toType<__m256i>());
+
+        // check zero flag from simd register.
+        // _mm256_testz_si256(v, v) => 
+        //      (v[255:0] & v[255:0] == 0) return 1;
+        return _mm256_testz_si256(v, v) == 1;
+    }
+
+    template<>
+    inline bool uint512_t::isEmpty() {
+        // Load to register.
+        // We are not just going to use the loop
+        // Better just hardcode it...
+        __m256i* tmpV = toType<__m256i>();
+        __m256i v1 = _mm256_load_si256(&tmpV[0]);
+        __m256i v2 = _mm256_load_si256(&tmpV[1]);
+
+        // check zero flag from simd register.
+        // _mm256_testz_si256(v1, v2) => 
+        //      (v1[255:0] & v2[255:0] == 0) return 1;
+        return !!_mm256_testz_si256(v1, v2);
+    }
+
+    template<>
+    inline bool uint2048_t::isEmpty() {
+        unsigned int indexV;
+        __m256i* tempV = toType<__m256i>(indexV);
+
+        // I think... loop unroll shoud be performed in here.
+        // maybe msvc will not unroll this. please check this code can unrollable.
+        int no_zf_stood = 0;
+        for (unsigned int i = 0; i < indexV; ++i) {
+            // Load and tests.
+            // We do not use branchs, non-branch loop is lot faster for this.
+            __m256i v = _mm256_load_si256(&tempV[i]);
+            no_zf_stood |= _mm256_testz_si256(v, v) != 1;
+        }
+        return !no_zf_stood;
+    }
+#endif
 }
 
 #endif
