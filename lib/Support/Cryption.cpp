@@ -80,7 +80,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private) {
+    CRESULT Cryption::getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Private) {
         RSA     *PrvKey;
         void    *RawKey = Private;
 
@@ -106,7 +106,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public) {
+    CRESULT Cryption::getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Public) {
         RSA     *PubKey;
         void    *RawKey = Public;
 
@@ -132,7 +132,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey) {
+    CRESULT Cryption::getSignature(RSA4096_t& SigOut, void* pIn, size_t szIn, RSA4096_t& PrvKey) {
         // szIn always have to be aligned as 2048 bits. 
         // we will return if its not rounded size.
         if (round_up<2048 / 8>(szIn) != szIn)
@@ -149,7 +149,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::verifySignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey) {
+    CRESULT Cryption::verifySignature(RSA4096_t& Sig, void* pIn, size_t szIn, RSA4096_t& PubKey) {
         // szIn always have to be aligned as 2048 bits. 
         // we will return if its not rounded size.
         if (round_up<2048 / 8>(szIn) != szIn)

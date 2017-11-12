@@ -21,24 +21,24 @@ namespace CoinBill {
         return (*m_prevNode);
     }
 
-    RSA4096_t& TransactionNode::getTransAuther() {
+    SHA256_t& TransactionNode::getTransAuther() {
         // returning auther of transaction.
         return m_TransAuther;
     }
-    RSA4096_t& TransactionNode::getTransAutherSign() {
+    RSA4096_t& TransactionNode::getTransSignature() {
         // returning auther signature of transaction.
-        return m_TransSignature;
+        return m_TransSign;
     }
 
     bool TransactionNode::isNodeHasSign() {
         // Empty sign mean that never initialized transaction sign.
         // we will return false if its empty. not signed.
-        return !(getTransAutherSign().isEmpty());
+        return !(getTransSignature().isEmpty());
     }
     bool TransactionNode::isNodeOwnerSame(Wallet* user) {
         // public key value of owner's account should same. 
         // we cannot proof the signature if owner isn't same.
-        return (user == m_creator) || (user->getPubKey() == getTransAuther());
+        return (user == m_creator) || (user->getAccount() == m_creator->getAccount());
     }
 
     bool TransactionNode::isNodeCoinTransferType() {
@@ -51,13 +51,13 @@ namespace CoinBill {
 
     bool TransactionNode::isNodeSignatureValid() {
         // Sign doesn't exists.
-        if (getTransAutherSign().isEmpty())
+        if (getTransSignature().isEmpty())
             return false;
 
         return (Cryption::verifySignature(
-            getTransAutherSign()    ,   // Transaction Auther Signature.
+            getTransSignature()     ,   // Transaction Auther Signature.
             getHead()               ,   // Transaction.
-            getTransAuther())           // Transaction Auther.
+            m_creator->getPubKey())     // Transaction Auther.
         != CRESULT::SUCCESSED);
     }
 
@@ -82,7 +82,7 @@ namespace CoinBill {
 
         // use this sign.
         m_creator           = user;
-        m_TransSignature    = sign;
+        m_TransSign    = sign;
         m_TransAuther       = user->getPubKey();
         
         return true;

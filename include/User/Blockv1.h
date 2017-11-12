@@ -9,7 +9,7 @@ namespace CoinBill
     struct BlockHeaderV1
     {
         SHA512_t    m_PrevHash;
-        RSA2048_t   m_Auther;
+        RSA4096_t   m_Auther;
 
         uint64_t    m_Version;
         uint64_t    m_TimeStamp;
