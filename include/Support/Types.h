@@ -248,7 +248,7 @@ namespace CoinBill
         __m256i* vl = toType<__m256i>();
         __m256i* vr = val.toType<__m256i>();
 
-        *vl = *vr;
+        _mm256_store_si256(vl, _mm256_load_si256(vr));
         return *this;
     }
 
@@ -258,8 +258,9 @@ namespace CoinBill
         __m256i* vl = toType<__m256i>();
         __m256i* vr = val.toType<__m256i>();
 
-        vl[0] = vr[0];
-        vl[1] = vr[1];
+
+        _mm256_store_si256(&vl[0], _mm256_load_si256(&vr[0]));
+        _mm256_store_si256(&vl[1], _mm256_load_si256(&vr[1]));
         return *this;
     }
 
@@ -271,7 +272,7 @@ namespace CoinBill
         __m256i* vr = val.toType<__m256i>();
 
         for (unsigned int i = 0; i < vi; ++i) {
-            vl[i] = vr[i];
+            _mm256_store_si256(&vl[i], _mm256_load_si256(&vr[i]));
         }
         return *this;
     }
