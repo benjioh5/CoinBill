@@ -37,24 +37,24 @@ namespace CoinBill
     {
         // Low Level Binding Methods.
         // This is very basic methods for cryption. 
-        CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Private);
-        CRESULT getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA2048_t& Public);
+        CRESULT getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Private);
+        CRESULT getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Public);
 
         // Encrypt / Decrypt template binding.
         template <class InTy>
-        CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA2048_t& Private) { 
+        CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA4096_t& Private) { 
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy), Private); 
         }
         template <class InTy, size_t size>
-        CRESULT getRSAPrvEncrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Private) {
+        CRESULT getRSAPrvEncrypt(void* pOut, InTy(&pIn)[size], RSA4096_t& Private) {
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy) * size, Private);
         }
         template <class InTy>
-        CRESULT getRSAPubDecrypt(void* pOut, InTy* pIn, RSA2048_t& Public) {
+        CRESULT getRSAPubDecrypt(void* pOut, InTy* pIn, RSA4096_t& Public) {
             return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy), Public);
         }
         template <class InTy, size_t size>
-        CRESULT getRSAPubDecrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Public) {
+        CRESULT getRSAPubDecrypt(void* pOut, InTy(&pIn)[size], RSA4096_t& Public) {
             return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy) * size, Public);
         }
 
@@ -81,49 +81,49 @@ namespace CoinBill
         bool isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS);
         bool isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS);
 
-        CRESULT getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
+        CRESULT getSignature(RSA4096_t& SigOut, void* pIn, size_t szIn, RSA4096_t& PrvKey);
 
         // getSignature template binding / aligning.
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature(RSA2048_t& SigOut, Ty& In, RSA2048_t& PrvKey) {
+        template <class Ty, class AlignedTy = ALIGN_V_TYP(Ty, RSA4096_t)>
+        CRESULT getSignature(RSA4096_t& SigOut, Ty& In, RSA4096_t& PrvKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
             return getSignature(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
         }
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT getSignature(RSA2048_t& SigOut, Ty* In, RSA2048_t& PrvKey) {
+        template <class Ty, class AlignedTy = ALIGN_V_TYP(Ty, RSA4096_t)>
+        CRESULT getSignature(RSA4096_t& SigOut, Ty* In, RSA4096_t& PrvKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
             return getSignature(SigOut, (void*)&AlignedIn, sizeof(AlignedTy), PrvKey);
         }
-        template <class Ty, unsigned int size, unsigned szAligned = round_up<2048>(size)>
-        CRESULT getSignature(RSA2048_t& SigOut, Ty(&In)[size], RSA2048_t& PrvKey) {
+        template <class Ty, unsigned int size, unsigned szAligned = sizeof(ALIGN_V_TYP(Ty, RSA4096_t))>
+        CRESULT getSignature(RSA4096_t& SigOut, Ty(&In)[size], RSA4096_t& PrvKey) {
             Ty AlignedIn[szAligned] = { 0, };
             memcpy((void*)AlignedIn, (void*)In  , size);
             return getSignature(SigOut, (void*)AlignedIn, sizeof(AlignedTy), PrvKey);
         }
 
-        CRESULT verifySignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey);
+        CRESULT verifySignature(RSA4096_t& Sig, void* pIn, size_t szIn, RSA4096_t& PubKey);
 
         // proof signature template binding / aligning.
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT verifySignature(RSA2048_t& Sig, Ty& In, RSA2048_t& PubKey) {
+        template <class Ty, class AlignedTy = ALIGN_V_TYP(Ty, RSA4096_t)>
+        CRESULT verifySignature(RSA4096_t& Sig, Ty& In, RSA4096_t& PubKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
             return verifySignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
         }
-        template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT verifySignature(RSA2048_t& Sig, Ty* In, RSA2048_t& PubKey) {
+        template <class Ty, class AlignedTy = ALIGN_V_TYP(Ty, RSA4096_t)>
+        CRESULT verifySignature(RSA4096_t& Sig, Ty* In, RSA4096_t& PubKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
             return verifySignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
         }
-        template <class Ty, unsigned int size, unsigned szAligned = round_up<2048>(size)>
-        CRESULT verifySignature(RSA2048_t& Sig, Ty(&In)[size], RSA2048_t& PubKey) {
+        template <class Ty, unsigned int size, unsigned szAligned = sizeof(ALIGN_V_TYP(Ty, RSA4096_t))>
+        CRESULT verifySignature(RSA4096_t& Sig, Ty(&In)[size], RSA4096_t& PubKey) {
             Ty AlignedIn[szAligned] = { 0, };
             memcpy((void*)AlignedIn, (void*)In  , size);
             return getSignature(Sig, (void*)AlignedIn, szAligned, PubKey);

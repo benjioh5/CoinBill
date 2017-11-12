@@ -12,7 +12,8 @@ namespace CoinBill
         COIN_SEND           = 0x02, // coin send type, when you going to send coins to other account.
     };
 
-    struct TransactionBase {
+    class TransactionHead final {
+    public:
         // transaction types are implemented on TransactionType enum.
         // see what kind of type is on.
         TransactionType     m_Type;
@@ -28,13 +29,8 @@ namespace CoinBill
         SHA512_t            m_Block;
     };
 
-    struct TransactionReward : public TransactionBase {
-        SHA512_t            m_BlockMined;
-        uint64_t            m_CoinReward;
-    };
-    struct TransactionSend : public TransactionBase {
-        RSA2048_t           m_TransferTo;
-        uint64_t            m_CoinSent;
+    class TransactionBody final {
+    public:
     };
 
     class TransactionNode final
@@ -42,20 +38,22 @@ namespace CoinBill
         Wallet*          m_creator;
 
     protected:
-        TransactionBase* m_transaction;
-        RSA2048_t        m_TransAuther;
-        RSA2048_t        m_TransAutherSign;
+        TransactionHead* m_TransHead;
+        TransactionBody* m_TransBody;
+        RSA4096_t        m_TransSignature;
+        RSA4096_t        m_TransAuther;
 
         TransactionNode* m_prevNode;
         TransactionNode* m_nextNode;
 
     public:
-        TransactionBase& getTransaction();
+        TransactionHead& getHead();
+        TransactionBody& getBody();
         TransactionNode& getPrevNode();
         TransactionNode& getNextNode();
 
-        RSA2048_t& getTransAuther();
-        RSA2048_t& getTransAutherSign();
+        RSA4096_t& getTransAuther();
+        RSA4096_t& getTransAutherSign();
 
         bool isNodeHasSign();
         bool isNodeOwnerSame(Wallet* user);
@@ -71,7 +69,7 @@ namespace CoinBill
         bool RefreshNodeSign(Wallet* user);
     };
 
-    RSA2048_t encryptTransaction(TransactionBase& transaction, Wallet* user);
+    RSA4096_t encryptTransaction(TransactionHead& transaction, Wallet* user);
 }
 
 #endif //COINBILL_USER_TRANSACTION

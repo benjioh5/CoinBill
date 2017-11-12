@@ -14,7 +14,7 @@
 #endif
 
 #define ALIGN_V(ty, val)                        ALIGNED_(val)          ty
-#define ALIGN_V_TYP(ty, typ)                    ALIGNED_(sizeof(typ)   ty
+#define ALIGN_V_TYP(ty, typ)                    ALIGNED_(sizeof(typ))  ty
 #define ALIGN_V_BIT(ty, bit)                    ALIGNED_(bit / 8)      ty
 
 namespace CoinBill

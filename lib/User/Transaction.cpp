@@ -5,9 +5,12 @@
 #include <Support/Cryption.h>
 
 namespace CoinBill {
-    TransactionBase& TransactionNode::getTransaction() {
+    TransactionHead& TransactionNode::getHead() {
         // returning the transaction now holding.
-        return (*m_transaction);
+        return (*m_TransHead);
+    }
+    TransactionBody& TransactionNode::getBody() {
+        return (*m_TransBody);
     }
     TransactionNode& TransactionNode::getNextNode() {
         // returning next trasaction node.
@@ -18,13 +21,13 @@ namespace CoinBill {
         return (*m_prevNode);
     }
 
-    RSA2048_t& TransactionNode::getTransAuther() {
+    RSA4096_t& TransactionNode::getTransAuther() {
         // returning auther of transaction.
         return m_TransAuther;
     }
-    RSA2048_t& TransactionNode::getTransAutherSign() {
+    RSA4096_t& TransactionNode::getTransAutherSign() {
         // returning auther signature of transaction.
-        return m_TransAutherSign;
+        return m_TransSignature;
     }
 
     bool TransactionNode::isNodeHasSign() {
@@ -39,11 +42,11 @@ namespace CoinBill {
     }
 
     bool TransactionNode::isNodeCoinTransferType() {
-        return getTransaction().m_Type == TransactionType::COIN_SEND;
+        return getHead().m_Type == TransactionType::COIN_SEND;
     }
 
     bool TransactionNode::isNodeCoinReward() {
-        return getTransaction().m_Type == TransactionType::COIN_REWARD;
+        return getHead().m_Type == TransactionType::COIN_REWARD;
     }
 
     bool TransactionNode::isNodeSignatureValid() {
@@ -53,14 +56,14 @@ namespace CoinBill {
 
         return (Cryption::verifySignature(
             getTransAutherSign()    ,   // Transaction Auther Signature.
-            getTransaction()        ,   // Transaction.
+            getHead()        ,   // Transaction.
             getTransAuther())           // Transaction Auther.
         != CRESULT::SUCCESSED);
     }
 
     bool TransactionNode::RefreshNodeData() {
-        getTransaction().m_Version  = Host::getHostVersion();
-        getTransaction().m_Time     = Host::getHostTime();
+        getHead().m_Version  = Host::getHostVersion();
+        getHead().m_Time     = Host::getHostTime();
 
         return true;
     }
@@ -71,22 +74,22 @@ namespace CoinBill {
 
     bool TransactionNode::RefreshNodeSign(Wallet* user) {
         // Try signing it.
-        RSA2048_t sign = encryptTransaction(getTransaction(), user);
+        RSA4096_t sign = encryptTransaction(getHead(), user);
 
         // Signing failed, returned empty sign, or signature isn't match with original.
-        if (sign.isEmpty() || (Cryption::verifySignature(sign, getTransaction(), user->getPubKey()) != CRESULT::SUCCESSED))
+        if (sign.isEmpty() || (Cryption::verifySignature(sign, getHead(), user->getPubKey()) != CRESULT::SUCCESSED))
             return false;
 
         // use this sign.
         m_creator           = user;
-        m_TransAutherSign   = sign;
+        m_TransSignature   = sign;
         m_TransAuther       = user->getPubKey();
         
         return true;
     }
 
-    RSA2048_t encryptTransaction(TransactionBase& transaction, Wallet* user) {
-        RSA2048_t sign = 0;
+    RSA4096_t encryptTransaction(TransactionHead& transaction, Wallet* user) {
+        RSA4096_t sign = 0;
 
         // You cannot sign without your private key.
         // this wallet is currupted, returning a empty sign.
@@ -94,7 +97,7 @@ namespace CoinBill {
             return sign;
 
         // Signing a transaction.
-        Cryption::getSignature<TransactionBase>(sign, transaction, user->getPrvKey());
+        Cryption::getSignature<TransactionHead>(sign, transaction, user->getPrvKey());
 
         // return signed signature.
         return sign;
