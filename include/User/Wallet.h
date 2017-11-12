@@ -30,4 +30,4 @@ namespace CoinBill
     };
 }
 
-#endif
+#endif // COINBILL_USER_WALLET

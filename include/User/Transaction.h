@@ -74,4 +74,4 @@ namespace CoinBill
     RSA2048_t encryptTransaction(TransactionBase& transaction, Wallet* user);
 }
 
-#endif
+#endif //COINBILL_USER_TRANSACTION

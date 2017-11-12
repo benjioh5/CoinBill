@@ -15,4 +15,4 @@ namespace CoinBill
     };
 }
 
-#endif
+#endif // COINBILL_NETWORK_SOCKET_PASSES

@@ -1,5 +1,5 @@
-#ifndef COINBILL_USER_BLOCK
-#define COINBILL_USER_BLOCK
+#ifndef COINBILL_USER_BLOCKV1
+#define COINBILL_USER_BLOCKV1
 
 #include <Support/Types.h>
 
@@ -43,4 +43,4 @@ namespace CoinBill
     BlockV1* refreshBlockHash(BlockV1* block, uint32_t cycle);
 }
 
-#endif
+#endif // COINBILL_USER_BLOCKV1

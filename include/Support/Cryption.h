@@ -130,4 +130,4 @@ namespace CoinBill
         }
     };
 };
-#endif
+#endif // COINBILL_SUPPORT_ALGORITHM

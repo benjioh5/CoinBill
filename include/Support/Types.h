@@ -148,7 +148,7 @@ namespace CoinBill
 
 #ifdef COINBILL_USE_SIMD
     //      ----=========================================================================================================----
-    //          |        SIMD Implements With Template Specalization.          using SIMD for betterf performance.      |
+    //          |        SIMD Implements With Template Specalization.          using SIMD for better performance.       |
     //      ----=========================================================================================================----
     //          | Targets                                                   |                                           |
     //          |   - uint2048_t                                            | RSA2048_t                                 |
@@ -276,7 +276,7 @@ namespace CoinBill
         }
         return *this;
     }
-#endif
+#endif // COINBILL_USE_SIMD
 }
 
-#endif
+#endif // COINBILL_SUPPORT_BIG_INT

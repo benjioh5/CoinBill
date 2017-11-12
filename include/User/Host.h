@@ -33,4 +33,4 @@ namespace CoinBill
     Host* createHost(Wallet* wallet);
 }
 
-#endif
+#endif // COINBILL_USER_HOST

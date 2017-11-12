@@ -28,4 +28,4 @@ namespace CoinBill
 }
 #pragma warning(pop)
 
-#endif
+#endif // COINBILL_SUPPORT_LOGGER

@@ -31,4 +31,4 @@ namespace CoinBill
     }
 }
 
-#endif
+#endif // COINBILL_NETWORK_SOCKET_FUNC_BINDING

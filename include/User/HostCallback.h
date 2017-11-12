@@ -11,4 +11,4 @@ namespace CoinBill
     };
 }
 
-#endif
+#endif // COINBILL_USER_HOST_CALLBACK
