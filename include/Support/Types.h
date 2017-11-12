@@ -218,7 +218,7 @@ namespace CoinBill
         // Load to register.
         __m256i* vo = toType<__m256i>();
         // Store a zero value.
-        *vo = _mm256_setzero_si256();
+        _mm256_store_si256(vo, _mm256_setzero_si256());
     }
 
     template<>
@@ -227,8 +227,9 @@ namespace CoinBill
         __m256i* vo = toType<__m256i>();
         const __m256i vz = _mm256_setzero_si256();
         // Store a zero value.
-        vo[0] = vz;
-        vo[1] = vz;
+
+        _mm256_store_si256(&vo[0], vz);
+        _mm256_store_si256(&vo[1], vz);
     }
 
     template<>
@@ -239,7 +240,7 @@ namespace CoinBill
 
         const __m256i vz = _mm256_setzero_si256();
         for (unsigned int i = 0; i < vi; ++i) {
-            vo[i] = vz;
+            _mm256_store_si256(&vo[i], vz);
         }
     }
 

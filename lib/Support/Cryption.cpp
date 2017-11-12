@@ -33,9 +33,7 @@ namespace CoinBill
         __m256i result = _mm256_xor_si256(vl, vr);
 
         // XOR result should zero, so there is no diffrence between LHS and RHS.
-        // we are checking that result is zero by testing bits. if the carry flag is 1 means zero.
-        // if ((~result) & result) == 0)
-        //      return 1;
+        // we are checking that result is zero by testing bits. if the zero flag is 1 means zero.
         return !_mm256_testz_si256(result, result);
     }
     bool Cryption::isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
@@ -51,8 +49,6 @@ namespace CoinBill
             _mm256_load_si256(&pvr[1])
         );
 
-        // XOR result should zero, so there is no diffrence between LHS and RHS.
-        // we are checking that result is zero by testing bits. if the carry flag is 1 means zero.
         __m256i result = _mm256_or_si256(masked1, masked2);
         return  !_mm256_testz_si256(result, result);
     }
