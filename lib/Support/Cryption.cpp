@@ -10,7 +10,6 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
-
 namespace CoinBill
 {
     void InitCryption() {
@@ -25,14 +24,46 @@ namespace CoinBill
         ERR_free_strings();
     }
 
-    // TODO : is there are better way to check is equal using SIMD..
-    bool Cryption::isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS) {
-        
+    /// TODO : is there are better way to check is equal using SIMD..
+    ///        Maybe we can use XOR with it.
+#ifdef COINBILL_USE_SIMD
+    bool Cryption::isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
+        __m256i vl = _mm256_load_si256(LHS.toType<__m256i>());
+        __m256i vr = _mm256_load_si256(RHS.toType<__m256i>());
+        __m256i result = _mm256_xor_si256(vl, vr);
+
+        // XOR result should zero, so there is no diffrence between LHS and RHS.
+        // we are checking that result is zero by testing bits. if the carry flag is 1 means zero.
+        // if ((~result) & result) == 0)
+        //      return 1;
+        return !_mm256_testz_si256(result, result);
+    }
+    bool Cryption::isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
+        __m256i* pvl = LHS.toType<__m256i>();
+        __m256i* pvr = RHS.toType<__m256i>();
+
+        __m256i masked1 = _mm256_xor_si256(
+            _mm256_load_si256(&pvl[0]),
+            _mm256_load_si256(&pvr[0])
+        );
+        __m256i masked2 = _mm256_xor_si256(
+            _mm256_load_si256(&pvl[1]),
+            _mm256_load_si256(&pvr[1])
+        );
+
+        // XOR result should zero, so there is no diffrence between LHS and RHS.
+        // we are checking that result is zero by testing bits. if the carry flag is 1 means zero.
+        __m256i result = _mm256_or_si256(masked1, masked2);
+        return  !_mm256_testz_si256(result, result);
+    }
+#else  // COINBILL_USE_SIMD
+    bool Cryption::isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
+        return LHS == RHS;
+}
+    bool Cryption::isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
         return LHS == RHS;
     }
-    bool Cryption::isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS) {
-        return LHS == RHS;
-    }
+#endif // !COINBILL_USE_SIMD
 
     // SHA Hasing Method Implements.
     CRESULT Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
@@ -75,6 +106,7 @@ namespace CoinBill
             RSA_PKCS1_PADDING       // Signature Padding.
         ), CRESULT::FAILED_ENCRYPT);
 
+        RSA_free(PrvKey);
         return CRESULT::SUCCESSED;
     }
 
@@ -100,6 +132,7 @@ namespace CoinBill
             RSA_PKCS1_PADDING       // Signature Padding.
         ), CRESULT::FAILED_DECRYPT);
 
+        RSA_free(PubKey);
         return CRESULT::SUCCESSED;
     }
 

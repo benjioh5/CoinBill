@@ -15,7 +15,7 @@ namespace CoinBill
         return (void*)((size_t)(value) + index);
     }
     template <class Type> inline void* offset(Type* value, int index) {
-        return (void*)((size_t)(value)+index);
+        return (void*)((size_t)(value) + index);
     }
 
     // TODO : Use SIMD instructions for faster checks.

@@ -192,9 +192,8 @@ namespace CoinBill
         __m256i v2 = _mm256_load_si256(&tmpV[1]);
 
         // check zero flag from simd register.
-        // _mm256_testz_si256(v1, v2) => 
-        //      (v1[255:0] & v2[255:0] == 0) return 1;
-        return !!_mm256_testz_si256(v1, v2);
+        __m256i result = _mm256_or_si256(v1, v2);
+        return _mm256_testz_si256(result, result);
     }
 
     template<>
@@ -209,7 +208,7 @@ namespace CoinBill
             // Load and tests.
             // We do not use branchs, non-branch loop is lot faster for this.
             __m256i v = _mm256_load_si256(&tempV[i]);
-            no_zf_stood |= _mm256_testz_si256(v, v) != 1;
+            no_zf_stood |= !_mm256_testz_si256(v, v);
         }
         return !no_zf_stood;
     }

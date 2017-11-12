@@ -45,13 +45,13 @@ namespace CoinBill
         CRESULT getRSAPrvEncrypt(void* pOut, InTy* pIn, RSA2048_t& Private) { 
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy), Private); 
         }
-        template <class InTy>
-        CRESULT getRSAPubDecrypt(void* pOut, InTy* pIn, RSA2048_t& Public) {
-            return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy), Public);
-        }
         template <class InTy, size_t size>
         CRESULT getRSAPrvEncrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Private) {
             return getRSAPrvEncrypt(pOut, (void*)pIn, sizeof(InTy) * size, Private);
+        }
+        template <class InTy>
+        CRESULT getRSAPubDecrypt(void* pOut, InTy* pIn, RSA2048_t& Public) {
+            return getRSAPubDecrypt(pOut, (void*)pIn, sizeof(InTy), Public);
         }
         template <class InTy, size_t size>
         CRESULT getRSAPubDecrypt(void* pOut, InTy(&pIn)[size], RSA2048_t& Public) {
@@ -65,21 +65,21 @@ namespace CoinBill
         CRESULT getSHA256Hash(SHA256_t& Out, Ty* pIn) { 
             return getSHA256Hash(Out, (void*)pIn, sizeof(Ty)); 
         }
-        template <class Ty>
-        CRESULT getSHA512Hash(SHA512_t& Out, Ty* pIn) { 
-            return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); 
-        }
         template <class Ty, size_t size>
         CRESULT getSHA256Hash(SHA256_t& Out, Ty(&pIn)[size]) { 
             return getSHA256Hash(Out, (void*)pIn, sizeof(Ty) * size); 
+        }
+        template <class Ty>
+        CRESULT getSHA512Hash(SHA512_t& Out, Ty* pIn) { 
+            return getSHA512Hash(Out, (void*)pIn, sizeof(Ty)); 
         }
         template <class Ty, size_t size>
         CRESULT getSHA512Hash(SHA512_t& Out, Ty(&pIn)[size]) { 
             return getSHA512Hash(Out, (void*)pIn, sizeof(Ty) * size); 
         }
 
-        bool isSHA256HashEqual(const SHA256_t& LHS, const SHA256_t& RHS);
-        bool isSHA512HashEqual(const SHA512_t& LHS, const SHA512_t& RHS);
+        bool isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS);
+        bool isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS);
 
         CRESULT getSignature(RSA2048_t& SigOut, void* pIn, size_t szIn, RSA2048_t& PrvKey);
 
