@@ -1,6 +1,8 @@
 #include <Support/Logger.h>
 #include <Support/Cryption.h>
+
 #include <Network/SocketFuncBinding.h>
+#include <Network/Socket.h>
 
 #include <User/Host.h>
 #include <User/Blockv1.h>
@@ -21,14 +23,13 @@ int main(int args, char* argc[], char* argv[])
 
     // check socket initialized successfully.
     if (!socketInit) {
-        LogErr() << "Failed initialize socket!" << std::endl;
-        return 0;
+        LogErr() << "Failed initialize socket!"                 << std::endl;
+        return -1;
     }
 
     // Initialize crypt algorithms.
     InitCryption();
-    LogInf() << "Initialized cryption algorithms "              << std::endl;
-
+    LogInf() << "Initialized cryption algorithms."              << std::endl;
 
     return 0;
 }
