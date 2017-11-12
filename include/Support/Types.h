@@ -105,11 +105,9 @@ namespace CoinBill
 
         // custom type constructor.
         template<class Ty>
-        BigTypeBase(const Ty& Init) {
+        BigTypeBase(const Ty Init) {
             *this = Init;
         }
-        template<class Ty>
-        BigTypeBase(const Ty Init) : BigTypeBase((const Ty&)Init) { }
         
         // default type constructor / distructor.
         BigTypeBase() = default;

@@ -149,7 +149,7 @@ namespace CoinBill
         return CRESULT::SUCCESSED;
     }
 
-    CRESULT Cryption::proofSignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey) {
+    CRESULT Cryption::verifySignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey) {
         // szIn always have to be aligned as 2048 bits. 
         // we will return if its not rounded size.
         if (round_up<2048 / 8>(szIn) != szIn)

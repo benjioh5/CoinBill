@@ -6,7 +6,6 @@ namespace CoinBill
 {
     // TODO_ALL : need to implements based on platform.
     //            we do only support MSVC for now.
-
     uint64_t Host::getHostVersion() {
         // TODO : CMake based versioning.
         return 0;
@@ -26,4 +25,7 @@ namespace CoinBill
         // The default hash cycle for block is 2.
         return 2;
     }
+
+
+    // Host Implements.
 }

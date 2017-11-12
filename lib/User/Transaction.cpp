@@ -51,7 +51,7 @@ namespace CoinBill {
         if (getTransAutherSign().isEmpty())
             return false;
 
-        return (Cryption::proofSignature(
+        return (Cryption::verifySignature(
             getTransAutherSign()    ,   // Transaction Auther Signature.
             getTransaction()        ,   // Transaction.
             getTransAuther())           // Transaction Auther.
@@ -74,7 +74,7 @@ namespace CoinBill {
         RSA2048_t sign = encryptTransaction(getTransaction(), user);
 
         // Signing failed, returned empty sign, or signature isn't match with original.
-        if (sign.isEmpty() || (Cryption::proofSignature(sign, getTransaction(), user->getPubKey()) != CRESULT::SUCCESSED))
+        if (sign.isEmpty() || (Cryption::verifySignature(sign, getTransaction(), user->getPubKey()) != CRESULT::SUCCESSED))
             return false;
 
         // use this sign.

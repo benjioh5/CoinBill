@@ -105,25 +105,25 @@ namespace CoinBill
             return getSignature(SigOut, (void*)AlignedIn, sizeof(AlignedTy), PrvKey);
         }
 
-        CRESULT proofSignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey);
+        CRESULT verifySignature(RSA2048_t& Sig, void* pIn, size_t szIn, RSA2048_t& PubKey);
 
         // proof signature template binding / aligning.
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT proofSignature(RSA2048_t& Sig, Ty& In, RSA2048_t& PubKey) {
+        CRESULT verifySignature(RSA2048_t& Sig, Ty& In, RSA2048_t& PubKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)&In, sizeof(Ty));
-            return proofSignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
+            return verifySignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
         }
         template <class Ty, class AlignedTy = ALIGN_V_BIT(Ty, 2048)>
-        CRESULT proofSignature(RSA2048_t& Sig, Ty* In, RSA2048_t& PubKey) {
+        CRESULT verifySignature(RSA2048_t& Sig, Ty* In, RSA2048_t& PubKey) {
             AlignedTy AlignedIn;
             memset((void*)&AlignedIn, 0         , sizeof(AlignedTy));
             memcpy((void*)&AlignedIn, (void*)In , sizeof(Ty));
-            return proofSignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
+            return verifySignature(Sig, (void*)&AlignedIn, sizeof(AlignedTy), PubKey);
         }
         template <class Ty, unsigned int size, unsigned szAligned = round_up<2048>(size)>
-        CRESULT proofSignature(RSA2048_t& Sig, Ty(&In)[size], RSA2048_t& PubKey) {
+        CRESULT verifySignature(RSA2048_t& Sig, Ty(&In)[size], RSA2048_t& PubKey) {
             Ty AlignedIn[szAligned] = { 0, };
             memcpy((void*)AlignedIn, (void*)In  , size);
             return getSignature(Sig, (void*)AlignedIn, szAligned, PubKey);
