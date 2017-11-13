@@ -6,6 +6,7 @@
 
 #include <User/Host.h>
 #include <User/Blockv1.h>
+#include <User/Wallet.h>
 
 #include <iostream>
 
@@ -30,6 +31,9 @@ int main(int args, char* argc[], char* argv[])
     // Initialize crypt algorithms.
     InitCryption();
     LogInf() << "Initialized cryption algorithms."              << std::endl;
+
+    Wallet* tw = createAccount();
+    tw->dump();
 
     return 0;
 }

@@ -195,7 +195,7 @@ namespace CoinBill
     }
 
     template<>
-    inline bool uint2048_t::isEmpty() {
+    inline bool uint4096_t::isEmpty() {
         unsigned int indexV;
         __m256i* tempV = toType<__m256i>(indexV);
 
@@ -231,7 +231,7 @@ namespace CoinBill
     }
 
     template<>
-    inline void uint2048_t::ZeroFill() {
+    inline void uint4096_t::ZeroFill() {
         // Load to register.
         unsigned int vi;
         __m256i* vo = toType<__m256i>(vi);
@@ -266,7 +266,7 @@ namespace CoinBill
 
     template<>
     template<>
-    inline uint2048_t& uint2048_t::operator=<uint2048_t&>(uint2048_t& val) {
+    inline uint4096_t& uint4096_t::operator=<uint4096_t&>(uint4096_t& val) {
         unsigned int vi;
         __m256i* vl = toType<__m256i>(vi);
         __m256i* vr = val.toType<__m256i>();

@@ -1,4 +1,5 @@
 #include <User/Host.h>
+#include <User/Blockv1.h>
 
 #include <time.h>
 
@@ -24,6 +25,9 @@ namespace CoinBill
     uint32_t Host::getHashCycle() {
         // The default hash cycle for block is 2.
         return 2;
+    }
+    BlockV1* Host::getLastBlock() {
+        return nullptr;
     }
 
 

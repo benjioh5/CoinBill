@@ -6,8 +6,9 @@
 namespace CoinBill
 {
     class Wallet;
-    struct BlockHeaderV1
+    class BlockHeaderV1
     {
+    public:
         SHA512_t    m_PrevHash;
         RSA4096_t   m_Auther;
 
@@ -24,8 +25,9 @@ namespace CoinBill
         void dump();
     };
 
-    struct BlockV1
+    class BlockV1
     {
+    public:
         BlockHeaderV1   m_Header;
         SHA512_t        m_HeaderHash;
 

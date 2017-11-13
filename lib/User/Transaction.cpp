@@ -20,11 +20,6 @@ namespace CoinBill {
         // returning prev transaction node.
         return (*m_prevNode);
     }
-
-    SHA256_t& TransactionNode::getTransAuther() {
-        // returning auther of transaction.
-        return m_TransAuther;
-    }
     RSA4096_t& TransactionNode::getTransSignature() {
         // returning auther signature of transaction.
         return m_TransSign;
@@ -82,8 +77,7 @@ namespace CoinBill {
 
         // use this sign.
         m_creator           = user;
-        m_TransSign    = sign;
-        m_TransAuther       = user->getPubKey();
+        m_TransSign         = sign;
         
         return true;
     }

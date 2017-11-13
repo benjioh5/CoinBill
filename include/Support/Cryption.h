@@ -32,7 +32,7 @@ namespace CoinBill
         INVALID_SIGNATURE                   = 0x21,
     };
 
-    struct BlockHeaderV1;
+    class BlockHeaderV1;
     namespace Cryption 
     {
         // Low Level Binding Methods.
