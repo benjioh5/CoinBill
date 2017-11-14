@@ -40,7 +40,7 @@ namespace CoinBill
     protected:
         TransactionHead* m_TransHead;
         TransactionBody* m_TransBody;
-        RSA4096_t        m_TransSign;
+        RSA_t            m_TransSign;
 
         TransactionNode* m_prevNode;
         TransactionNode* m_nextNode;
@@ -50,7 +50,7 @@ namespace CoinBill
         TransactionBody& getBody();
         TransactionNode& getPrevNode();
         TransactionNode& getNextNode();
-        RSA4096_t& getTransSignature();
+        RSA_t& getTransSignature();
 
         bool isNodeHasSign();
         bool isNodeOwnerSame(Wallet* user);
@@ -66,7 +66,7 @@ namespace CoinBill
         bool RefreshNodeSign(Wallet* user);
     };
 
-    RSA4096_t encryptTransaction(TransactionHead& transaction, Wallet* user);
+    RSA_t encryptTransaction(TransactionHead& transaction, Wallet* user);
 }
 
 #endif //COINBILL_USER_TRANSACTION

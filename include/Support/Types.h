@@ -50,7 +50,9 @@ namespace CoinBill
         inline friend bool operator> (const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >  0; }
         inline friend bool operator>=(const MTy& LHS, const MTy& RHS) { return iterate_cmp<BaseTy, size>((void*)LHS.data, (void*)RHS.data) >= 0; }
         inline operator BaseTy*() { return data; }
-        inline operator void*() { return (void*)data; }
+        inline operator void*() { return data }
+        inline operator unsigned char*() { return toType<uint8_t>(); }
+        inline operator char*() { return toType<int8_t>(); }
 
         template <class OTy> inline MTy& operator++(OTy) { 
             increasePos(0, (BaseTy)1); 
@@ -129,7 +131,7 @@ namespace CoinBill
     typedef BigTypeBase<8, uint64_t>                                uint512_t;
     typedef BigTypeBase<64, uint64_t>                               uint4096_t;
 
-    typedef uint4096_t                                              RSA4096_t;
+    typedef uint4096_t                                              RSA_t;
     typedef uint256_t                                               SHA256_t;
     typedef uint512_t                                               SHA512_t;
 

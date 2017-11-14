@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.8)
 project(CoinBill C CXX)
 
 # We are using OpenSSL for cryption, Boost for socket.
-find_package(OpenSSL REQUIRED)
-find_package(Boost COMPONENTS system)
+find_package(CryptoPP   REQUIRED)
+find_package(Boost      COMPONENTS system)
 
 # Initialize default directories.
 set(COINBILL_TOP_DIR ${CMAKE_SOURCE_DIR})
@@ -21,42 +21,45 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${COINBILL_OUT_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${COINBILL_OUT_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${COINBILL_OUT_DIR}/bin)
 
-# Initialize target directories / libraries.
-set(COINBILL_TARGET_LIBRARIES ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
-set(COINBILL_TARGET_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
-set(COINBILL_TARGET_LIBRARY_DIRS ${Boost_LIBRARY_DIRS} )
-
 # Target type defines.
 if(WIN32)
     list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_WINDOWS)
 elseif(APPLE)
     list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_MAC_OS)
 elseif(UNIX)
-    list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_UNIX)
+    list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_UNIX_OS)
 endif()
+
+include_directories(${COINBILL_INC_DIR})
+list(APPEND COINBILL_TARGET_LIBRARIES cryptopp-static)
 
 # Boost defines.
 if(Boost_FOUND)
     option(USE_BOOST_ASIO "Use socket library for boost asio." TRUE)
     if(USE_BOOST_ASIO)
-        list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_USE_BOOST_ASIO)
+        message(STATUS "CoinBill : Boost found. Using Boost ASIO.")
+        include_directories(${Boost_INCLUDE_DIRS})
+        list(APPEND COINBILL_TARGET_LIBRARIES           ${Boost_LIBRARIES})
+        list(APPEND COINBILL_TARGET_LIBRARY_DIRS        ${Boost_LIBRARY_DIRS})
+        list(APPEND COINBILL_TARGET_DEFINES             -DCOINBILL_USE_BOOST_ASIO)
     endif()
 endif()
 
 option(USE_SIMD_INSTRUCTIONS "User SIMD for better performance" TRUE)
 if(USE_SIMD_INSTRUCTIONS)
+    message(STATUS "CoinBill : SIMD Enable.")
     list(APPEND COINBILL_TARGET_DEFINES -DCOINBILL_USE_SIMD)
 endif()
 
 # Add and initialize subdirectories.
+add_definitions(${COINBILL_TARGET_DEFINES})
 add_subdirectory(${COINBILL_LIB_DIR}/Network/)
 add_subdirectory(${COINBILL_LIB_DIR}/Support/)
 add_subdirectory(${COINBILL_LIB_DIR}/User/)
 
 # Now compile it.
-AddCoinbill_Exe(CoinBillExec ${COINBILL_LIB_DIR}/CoinBill.cpp)
-target_link_libraries(
-    CoinBillExec 
+add_executable(CoinBillExec ${COINBILL_LIB_DIR}/CoinBill.cpp)
+target_link_libraries(CoinBillExec
     CoinBillNetwork 
     CoinBillSupport 
     CoinBillUser

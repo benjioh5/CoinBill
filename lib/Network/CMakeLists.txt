@@ -1,4 +1,4 @@
-AddCoinbill_Lib(CoinBillNetwork
+AddCBLib(CoinBillNetwork
     Socket.cpp
     SocketFuncBinding.cpp
 

@@ -6,11 +6,11 @@
 
 namespace CoinBill
 {
-    RSA4096_t& Wallet::getPubKey() {
+    RSA_t& Wallet::getPubKey() {
         // returning a public key of wallet.
         return m_data.m_PubKey;
     }
-    RSA4096_t& Wallet::getPrvKey() {
+    RSA_t& Wallet::getPrvKey() {
         // returning a private key of wallet.
         return m_data.m_PrvKey;
     }
@@ -39,8 +39,6 @@ namespace CoinBill
             // we don't holding a public key.
             return false;
 
-        // We created a hash for account.
-        Cryption::getSHA256Hash(m_account, &m_data.m_PubKey);
         return true;
     }
 
@@ -49,16 +47,6 @@ namespace CoinBill
         // Try extracting public key from private key.
         if (!m_data.m_PrvKey.isEmpty()) {
             // The private key should not empty.
-            RSA*  PubKey = RSA_new();
-            void* PrvKeyBuf = m_data.m_PrvKey;
-            void* PubKeyBuf = m_data.m_PubKey;
-
-            // Extract key from data.
-            d2i_RSAPrivateKey(&PubKey, (const unsigned char**)&PrvKeyBuf, sizeof(RSA4096_t) * 8);
-
-            // Re Initialize key to data.
-            i2d_RSAPublicKey(PubKey, (unsigned char**)&PubKeyBuf);
-            RSA_free(PubKey);
             return true;
         }
         return false;
@@ -85,7 +73,7 @@ namespace CoinBill
         delete wallet;
     }
     
-    Wallet* createAccount(BlockV1* block, RSA4096_t& PrvKey, RSA4096_t& PubKey) {
+    Wallet* createAccount(BlockV1* block, RSA_t& PrvKey, RSA_t& PubKey) {
         Wallet*         wallet      = createManagedWallet();
         WalletData&     walletData  = wallet->getWalletData();
 
@@ -102,43 +90,15 @@ namespace CoinBill
 
         return wallet;
     }
-    Wallet* createAccount(BlockV1* block, RSA4096_t& PrvKey) {
+    Wallet* createAccount(BlockV1* block, RSA_t& PrvKey) {
         return createAccount(block, PrvKey, PrvKey);
     }
-    Wallet* createAccount(RSA* Key) {
-        RSA4096_t PrvKey = 0;
-        RSA4096_t PubKey = 0;
-        void* pPrvBuf = PrvKey;
-        void* pPubBuf = PubKey;
-
-        // Key should not nullptr, also valid.
-        if (Key == nullptr || !RSA_check_key(Key))
-            return nullptr;
-
-        
-
-        return createAccount(Host::getLastBlock(), PrvKey, PubKey);
-    }
-    Wallet* createAccountPrv(RSA4096_t& PrvKey) {
+    Wallet* createAccountPrv(RSA_t& PrvKey) {
         return createAccount(Host::getLastBlock(), PrvKey);
     }
-    Wallet* createAccountPub(RSA4096_t& PubKey) {
-        return createAccount(Host::getLastBlock(), (RSA4096_t)0, PubKey);
+    Wallet* createAccountPub(RSA_t& PubKey) {
+        return createAccount(Host::getLastBlock(), (RSA_t)0, PubKey);
     }
     Wallet* createAccount() {
-        Wallet* wallet  = nullptr;
-
-        RSA*    Key     = RSA_new();
-        BIGNUM* Bne     = BN_new();
-
-        IF_FAILED_GOTO(BN_set_word(Bne, RSA_F4)                 , END_POINT);
-        IF_FAILED_GOTO(RSA_generate_key_ex(Key, 2048, Bne, 0)   , END_POINT);
-
-        wallet = createAccount(Key);
-
-    END_POINT:
-        RSA_free(Key);
-        BN_free(Bne);
-        return wallet;
     }
 }

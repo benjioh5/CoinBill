@@ -13,8 +13,8 @@ namespace CoinBill
     {
     public:
         
-        RSA4096_t   m_PubKey;
-        RSA4096_t   m_PrvKey;
+        RSA_t   m_PubKey;
+        RSA_t   m_PrvKey;
 
         SHA512_t    m_Block;
         uint64_t    m_Money;
@@ -27,8 +27,8 @@ namespace CoinBill
 
     public:
         SHA256_t&   getAccount();
-        RSA4096_t&  getPubKey();
-        RSA4096_t&  getPrvKey();
+        RSA_t&  getPubKey();
+        RSA_t&  getPrvKey();
         
         SHA512_t&   getWalletBlock();
         uint64_t    getWalletCoin();
@@ -42,11 +42,10 @@ namespace CoinBill
     Wallet* createManagedWallet();
     void deleteManagedWallet(CoinBill::Wallet* wallet);
 
-    Wallet* createAccount(BlockV1* block, RSA4096_t& PrvKey, RSA4096_t& PubKey);
-    Wallet* createAccount(BlockV1* block, RSA4096_t& PrvKey);
-    Wallet* createAccount(RSA* Key);
-    Wallet* createAccountPrv(RSA4096_t& PrvKey);
-    Wallet* createAccountPub(RSA4096_t& PubKey);
+    Wallet* createAccount(BlockV1* block, RSA_t& PrvKey, RSA_t& PubKey);
+    Wallet* createAccount(BlockV1* block, RSA_t& PrvKey);
+    Wallet* createAccountPrv(RSA_t& PrvKey);
+    Wallet* createAccountPub(RSA_t& PubKey);
     Wallet* createAccount();
 }
 

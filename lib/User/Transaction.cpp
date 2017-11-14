@@ -20,7 +20,7 @@ namespace CoinBill {
         // returning prev transaction node.
         return (*m_prevNode);
     }
-    RSA4096_t& TransactionNode::getTransSignature() {
+    RSA_t& TransactionNode::getTransSignature() {
         // returning auther signature of transaction.
         return m_TransSign;
     }
@@ -46,14 +46,9 @@ namespace CoinBill {
 
     bool TransactionNode::isNodeSignatureValid() {
         // Sign doesn't exists.
-        if (getTransSignature().isEmpty())
+        if (!isNodeHasSign())
             return false;
 
-        return (Cryption::verifySignature(
-            getTransSignature()     ,   // Transaction Auther Signature.
-            getHead()               ,   // Transaction.
-            m_creator->getPubKey())     // Transaction Auther.
-        != CRESULT::SUCCESSED);
     }
 
     bool TransactionNode::RefreshNodeData() {
@@ -69,11 +64,8 @@ namespace CoinBill {
 
     bool TransactionNode::RefreshNodeSign(Wallet* user) {
         // Try signing it.
-        RSA4096_t sign = encryptTransaction(getHead(), user);
+        RSA_t sign = encryptTransaction(getHead(), user);
 
-        // Signing failed, returned empty sign, or signature isn't match with original.
-        if (sign.isEmpty() || (Cryption::verifySignature(sign, getHead(), user->getPubKey()) != CRESULT::SUCCESSED))
-            return false;
 
         // use this sign.
         m_creator           = user;
@@ -82,16 +74,13 @@ namespace CoinBill {
         return true;
     }
 
-    RSA4096_t encryptTransaction(TransactionHead& transaction, Wallet* user) {
-        RSA4096_t sign = 0;
+    RSA_t encryptTransaction(TransactionHead& transaction, Wallet* user) {
+        RSA_t sign = 0;
 
         // You cannot sign without your private key.
         // this wallet is currupted, returning a empty sign.
         if (user->getPrvKey().isEmpty())
             return sign;
-
-        // Signing a transaction.
-        Cryption::getSignature<TransactionHead>(sign, transaction, user->getPrvKey());
 
         // return signed signature.
         return sign;

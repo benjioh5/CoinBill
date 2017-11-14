@@ -2,32 +2,54 @@
 
 #include <Support/Basic.h>
 #include <Support/Cryption.h>
+#include <Support/MemPool.h>
 
 #include <User/Blockv1.h>
 
-// Basic OpenSSL Headers.
-#include <openssl/conf.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
+// CryptoPP headers.
+#include <rsa.h>
+#include <sha3.h>
+#include <rng.h>
+
+CryptoPP::RandomNumberGenerator* RNG_Engine;
 
 namespace CoinBill
-{
+{                   
+    MemPool<SHA256_t>                           SHA256_MemPool;
+    MemPool<CryptoPP::SHA3_256>                 SHA256Engine_MemPool;
+
+    MemPool<SHA512_t>                           SHA512_MemPool;
+    MemPool<CryptoPP::SHA3_512>                 SHA512Engine_MemPool;
+
+    MemPool<RSA_t>                              RSA_MemPool;
+    MemPool<CryptoPP::InvertibleRSAFunction>    RSAEngine_MemPool;
+
+    // Mananged key, hash object allocators.
+    // we do allocate key, hash holder from MemPool class for faster allocation.
+    // do not deallocate objects in other place, use disposeXXX function.
+    //
+    // those objects are thread-safe, mutex is inside in MemPool class.
+    // you don't need to care about thread safes.
+    SHA256_t* createSHA256()                    { return new (SHA256_MemPool) SHA256_t(); }
+    SHA512_t* createSHA512()                    { return new (SHA512_MemPool) SHA512_t(); }
+    RSA_t* createRSA()                          { return new (RSA_MemPool) RSA_t(); }
+
+    // Managed key, hash object disposer.
+    void disposeSHA256(SHA256_t* object)        { operator delete(object, SHA256_MemPool); }
+    void disposeSHA512(SHA512_t* object)        { operator delete(object, SHA512_MemPool); }
+    void disposeRSA(RSA_t* object)              { operator delete(object, RSA_MemPool); }
+
     void InitCryption() {
-        // Initializing all OpenSSL functions.
-        ERR_load_crypto_strings();
-        OpenSSL_add_all_algorithms();
+        RNG_Engine = new CryptoPP::RandomNumberGenerator();
     }
     void StopCryption() {
-        // Releasing / Cleanup all OpenSSL functions.
-        EVP_cleanup();
-        CRYPTO_cleanup_all_ex_data();
-        ERR_free_strings();
+        delete RNG_Engine;
     }
 
     /// TODO : is there are better way to check is equal using SIMD..
     ///        Maybe we can use XOR with it.
 #ifdef COINBILL_USE_SIMD
-    bool Cryption::isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
+    bool isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
         __m256i vl = _mm256_load_si256(LHS.toType<__m256i>());
         __m256i vr = _mm256_load_si256(RHS.toType<__m256i>());
         __m256i result = _mm256_xor_si256(vl, vr);
@@ -36,10 +58,11 @@ namespace CoinBill
         // we are checking that result is zero by testing bits. if the zero flag is 1 means zero.
         return !_mm256_testz_si256(result, result);
     }
-    bool Cryption::isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
+    bool isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
         __m256i* pvl = LHS.toType<__m256i>();
         __m256i* pvr = RHS.toType<__m256i>();
 
+        // xor LHS, RHS. if result of xor is zero, its equal.
         __m256i masked1 = _mm256_xor_si256(
             _mm256_load_si256(&pvl[0]),
             _mm256_load_si256(&pvr[0])
@@ -49,122 +72,123 @@ namespace CoinBill
             _mm256_load_si256(&pvr[1])
         );
 
+        // or the xor result.
         __m256i result = _mm256_or_si256(masked1, masked2);
         return  !_mm256_testz_si256(result, result);
     }
 #else  // COINBILL_USE_SIMD
-    bool Cryption::isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
+    bool isSHA256HashEqual(SHA256_t& LHS, SHA256_t& RHS) {
         return LHS == RHS;
-}
-    bool Cryption::isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
+    }
+    bool isSHA512HashEqual(SHA512_t& LHS, SHA512_t& RHS) {
         return LHS == RHS;
     }
 #endif // !COINBILL_USE_SIMD
 
-    // SHA Hasing Method Implements.
-    CRESULT Cryption::getSHA256Hash(SHA256_t& Out, void* pIn, size_t szIn) {
-        SHA256_CTX sha256;
-        // Hash creation.
-        IF_FAILED_RET(SHA256_Init(&sha256)                          , CRESULT::FAILED_INIT  );
-        IF_FAILED_RET(SHA256_Update(&sha256, pIn, szIn)             , CRESULT::FAILED_UPDATE);
-        IF_FAILED_RET(SHA256_Final(Out.toUint8(), &sha256)          , CRESULT::FAILED_UPDATE);
-        return CRESULT::SUCCESSED;
+    // creating a instance from memory pool.
+    // the raw class instance. we are going to handle it as just a pointer.
+    // because we want to do cryption only on here.
+    // for easier debugging, logging, avoid deallocating in other place.
+    //
+    // these objects are managed by MemPool class for faster allocation.
+    // do not deallocate manually.
+    //
+    // This isn't a SHA256 object itself, its engine that we can compute cryption.
+    void querySHA256Engine(SHA256_HANDLE& handle) {
+        // allocate from SHA256 Engine pool.
+        handle = (SHA256_HANDLE)(new(SHA256Engine_MemPool) CryptoPP::SHA3_256());
+    }
+    void querySHA512Engine(SHA512_HANDLE& handle) {
+        // allocate from SHA512 Engine pool.
+        handle = (SHA512_HANDLE)(new(SHA512Engine_MemPool) CryptoPP::SHA3_512());
+    }
+    void queryRSAEngine(RSA_HANDLE& handle) {
+        handle = (RSA_HANDLE)(new(RSAEngine_MemPool) CryptoPP::InvertibleRSAFunction());
     }
 
-    CRESULT Cryption::getSHA512Hash(SHA512_t& Out, void* pIn, size_t szIn) {
-        SHA512_CTX sha512;
-        // Hash creation.
-        IF_FAILED_RET(SHA512_Init(&sha512)                          , CRESULT::FAILED_INIT  );
-        IF_FAILED_RET(SHA512_Update(&sha512, pIn, szIn)             , CRESULT::FAILED_UPDATE);
-        IF_FAILED_RET(SHA512_Final(Out.toUint8(), &sha512)          , CRESULT::FAILED_UPDATE);
-        return CRESULT::SUCCESSED;
+    // add a crypt target in a instance.
+    // casing handle into a raw class instance.
+    // and we are going to update the target buffer on it before we finalize it.
+    //
+    // note that you should call flush method before reusing it.
+    void querySHA256Update(SHA256_HANDLE& handle, void* pIn, size_t szIn) {
+        CryptoPP::SHA3_256* 
+            pEngine = (CryptoPP::SHA3_256*)handle;
+            pEngine->Update((uint8_t*)pIn, szIn);
+        // Add crypt target in engine.
+    }
+    void querySHA512Update(SHA512_HANDLE& handle, void* pIn, size_t szIn) {
+        CryptoPP::SHA3_512*
+            pEngine = (CryptoPP::SHA3_512*)handle;
+            pEngine->Update((uint8_t*)pIn, szIn);
+        // Add crypt target in engine.
     }
 
-    CRESULT Cryption::getRSAPrvEncrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Private) {
-        RSA     *PrvKey;
-        void    *RawKey = Private;
-
-        // extract key from a buffer. 
-        // this will return the OpenSSL managed RSA key.
-        d2i_RSAPrivateKey(&PrvKey, (const unsigned char**)&RawKey, Private.getSize());
-
-        // check the key valid.
-        if (!!RSA_check_key(PrvKey) != true)
-            // This is a invalid private key.
-            return CRESULT::INVALID_PRV_KEY;
-
-        // Encrypting pIn(Signature)
-        IF_FAILED_RET( RSA_private_encrypt(
-            szIn,                   // Signature Size.
-            (unsigned char*)pIn,    // Signature Buffer.
-            (unsigned char*)pOut,   // Output.
-            PrvKey,                 // Signature Key.
-            RSA_PKCS1_PADDING       // Signature Padding.
-        ), CRESULT::FAILED_ENCRYPT);
-
-        RSA_free(PrvKey);
-        return CRESULT::SUCCESSED;
+    // finalize crypt instance.
+    // we create a actaul hash here. out buffer should not be nullptr.
+    void querySHA256Verify(SHA256_HANDLE& handle, SHA256_t& out) {
+        CryptoPP::SHA3_256*
+            pEngine = (CryptoPP::SHA3_256*)handle;
+            pEngine->Final(out);
+    }
+    void querySHA512Verify(SHA512_HANDLE& handle, SHA512_t& out) {
+        CryptoPP::SHA3_512*
+            pEngine = (CryptoPP::SHA3_512*)handle;
+            pEngine->Final(out);
     }
 
-    CRESULT Cryption::getRSAPubDecrypt(void* pOut, void* pIn, unsigned int szIn, RSA4096_t& Public) {
-        RSA     *PubKey;
-        void    *RawKey = Public;
+    // deleting, destructing instance.
+    // we distruct the instance and recollect into MemPool.
+    // 
+    // we don't really recommend if you are reusing a object, use flush instead of this.
+    void querySHA256Delete(SHA256_HANDLE& handle) {
+        CryptoPP::SHA3_256*
+            pEngine = (CryptoPP::SHA3_256*)handle;
 
-        // extract key from a buffer. 
-        // this will return the OpenSSL managed RSA key.
-        d2i_RSAPublicKey(&PubKey, (const unsigned char**)&RawKey, Public.getSize());
+        SHA256Engine_MemPool.distroy(pEngine);
+    }
+    void querySHA512Delete(SHA512_HANDLE& handle) {
+        CryptoPP::SHA3_512*
+            pEngine = (CryptoPP::SHA3_512*)handle;
 
-        // check the key valid.
-        if (!!RSA_check_key(PubKey) != true)
-            // This is a invalid public key.
-            return CRESULT::INVALID_PUB_KEY;
-
-        // Decrypting pIn(Signature)
-        IF_FAILED_RET(RSA_public_decrypt(
-            szIn,                   // Signature Size.
-            (unsigned char*)pIn,    // Signature Buffer.
-            (unsigned char*)pOut,   // Output.
-            PubKey,                 // Signature Key.
-            RSA_PKCS1_PADDING       // Signature Padding.
-        ), CRESULT::FAILED_DECRYPT);
-
-        RSA_free(PubKey);
-        return CRESULT::SUCCESSED;
+        SHA512Engine_MemPool.distroy(pEngine);
+    }
+    void queryRSADelete(RSA_HANDLE& handle) {
+        CryptoPP::InvertibleRSAFunction*
+            pEngine = (CryptoPP::InvertibleRSAFunction*)handle;
     }
 
-    CRESULT Cryption::getSignature(RSA4096_t& SigOut, void* pIn, size_t szIn, RSA4096_t& PrvKey) {
-        // szIn always have to be aligned as 2048 bits. 
-        // we will return if its not rounded size.
-        if (round_up<2048 / 8>(szIn) != szIn)
-            // pIn isn't a aligned variable, align it first.
-            return CRESULT::FAILED_NOT_ROUNDED;
+    // flush instance.
+    // flush instance values, that stored using verifiy, update function.
+    void querySHA256Flush(SHA256_HANDLE& handle) {
+        CryptoPP::SHA3_256*
+            pEngine = (CryptoPP::SHA3_256*)handle;
 
-        SHA512_t tempHash;
-
-        // now hashing, encrypting.
-        getSHA512Hash(tempHash, pIn, szIn);
-        getRSAPrvEncrypt(&SigOut, &tempHash, PrvKey);
-        
-
-        return CRESULT::SUCCESSED;
+        pEngine->Restart();
     }
+    void querySHA512Flush(SHA512_HANDLE& handle) {
+        CryptoPP::SHA3_256*
+            pEngine = (CryptoPP::SHA3_256*)handle;
 
-    CRESULT Cryption::verifySignature(RSA4096_t& Sig, void* pIn, size_t szIn, RSA4096_t& PubKey) {
-        // szIn always have to be aligned as 2048 bits. 
-        // we will return if its not rounded size.
-        if (round_up<2048 / 8>(szIn) != szIn)
-            // pIn isn't a aligned variable, align it first.
-            return CRESULT::FAILED_NOT_ROUNDED;
-
-        SHA512_t tempHash;
-        SHA512_t tempSign;
-
-        // now hashing, decrypting.
-        getSHA512Hash(tempHash, pIn, szIn);         // get original hash by hashing pIn
-        getRSAPubDecrypt(&tempSign, &Sig, PubKey);  // get original hash by decrypting signature.
-
-        // tempSig will return original hash value.
-        // we are going to compare it.
-        return isSHA512HashEqual(tempHash, tempSign) ? CRESULT::SUCCESSED : CRESULT::INVALID_SIGNATURE;
+        pEngine->Restart();
+    }
+    
+    // Encrypt, Decrypt functions.
+    // basically, we use these functions for signing.
+    void queryRSAEncryptPub(RSA_HANDLE& handle, RSA_t& Key, void* pIn, size_t szIn) {
+        CryptoPP::InvertibleRSAFunction* pEngine = 
+            (CryptoPP::InvertibleRSAFunction*)handle;
+    }
+    void queryRSADecrpytPub(RSA_HANDLE& handle, RSA_t& Key, void* pOut, size_t szOut) {
+        CryptoPP::InvertibleRSAFunction* pEngine =
+            (CryptoPP::InvertibleRSAFunction*)handle;
+    }
+    void queryRSAEncryptPrv(RSA_HANDLE& handle, RSA_t& Key, void* pIn, size_t szIn) {
+        CryptoPP::InvertibleRSAFunction* pEngine =
+            (CryptoPP::InvertibleRSAFunction*)handle;
+    }
+    void queryRSADecryptPrv(RSA_HANDLE& handle, RSA_t& Key, void* pOut, size_t szOut) {
+        CryptoPP::InvertibleRSAFunction* pEngine =
+            (CryptoPP::InvertibleRSAFunction*)handle;
     }
 }

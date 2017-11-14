@@ -1,4 +1,4 @@
-AddCoinbill_Lib(CoinBillUser
+AddCBLib(CoinBillUser
     Blockv1.cpp
     Host.cpp
     Transaction.cpp

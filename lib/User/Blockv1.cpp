@@ -2,33 +2,51 @@
 #include <User/Blockv1.h>
 #include <User/Wallet.h>
 
+#include <Support/Logger.h>
 #include <Support/Cryption.h>
-
+#include <Support/MemPool.h>
 
 namespace CoinBill
 {
     // We use SHA-512 to hash block.
     BlockV1* refreshBlockHash(BlockV1* block, uint32_t cycle) {
-        // Nothing to hash...
-        if (cycle == 0) 
+        BlockV1*        ret = nullptr;
+
+        SHA512_HANDLE   handle;
+        SHA512_t*       hashTmp1 = createSHA512();
+        SHA512_t*       hashTmp2 = createSHA512();
+
+        // Zero cycle?.. something is wrong.
+        if (cycle == 0)
             return nullptr;
 
-        // Reset hash.
-        SHA512_t &curHash = block->m_HeaderHash; 
-        curHash = 0;
+        // create a instance.
+        querySHA512Engine(handle);
+        try {
+            // Pre hashing it before we iterate it.
+            querySHA512Update(handle, &block->m_Header, sizeof(BlockHeaderV1));
+            querySHA512Verify(handle, *hashTmp1);
 
-        // Prehash header.
-        if(Cryption::getSHA512Hash(curHash, &block->m_Header) != CRESULT::SUCCESSED)
-            // Pre hashing a block header fails, we do not try hashing the pre hashed value.
-            // maybe block header currupted...
-            return nullptr;
+            // To iterate it.
+            for (unsigned int i = 0; i < cycle - 1; ++i) {
+                querySHA512Update(handle, *hashTmp1, sizeof(SHA512_t));
+                querySHA512Verify(handle, *hashTmp2);
 
-        // Starting i with 1, because we prehashed it.
-        // if it has 1 cycle will pass this job.
-        for (unsigned int i = 1; i < cycle; ++i) {
-            Cryption::getSHA512Hash(curHash, &curHash);
+                std::swap(hashTmp1, hashTmp2);
+            }
+
+            // copy it.
+            block->m_HeaderHash = *hashTmp1;
+            ret = block;
+        } catch (const std::exception& e) {
+            LogErr() << "EXCEPTION WHILE HASHING BLOCK : " << e.what() << std::endl;
         }
-        return block;
+        querySHA512Delete(handle);
+
+        // dispose temp object.
+        disposeSHA512(hashTmp1);
+        disposeSHA512(hashTmp2);
+        return ret;
     }
 
     // Creating a new block based on user, previus block.
