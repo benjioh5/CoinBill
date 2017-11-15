@@ -3,6 +3,8 @@
 #include <Support/Basic.h>
 #include <Support/Cryption.h>
 #include <Support/MemPool.h>
+#include <iostream>
+#include <sstream>
 
 #include <User/Blockv1.h>
 
@@ -22,7 +24,9 @@ namespace CoinBill
     MemPool<CryptoPP::SHA3_512>                 SHA512Engine_MemPool;
 
     MemPool<RSA_t>                              RSA_MemPool;
-    MemPool<CryptoPP::InvertibleRSAFunction>    RSAEngine_MemPool;
+    MemPool<CryptoPP::InvertibleRSAFunction>    RSAEngine_MemPoolPrv;
+    MemPool<CryptoPP::RSAFunction>              RSAEngine_MemPoolPub;
+    
 
     // Mananged key, hash object allocators.
     // we do allocate key, hash holder from MemPool class for faster allocation.
@@ -102,8 +106,25 @@ namespace CoinBill
         // allocate from SHA512 Engine pool.
         handle = (SHA512_HANDLE)(new(SHA512Engine_MemPool) CryptoPP::SHA3_512());
     }
-    void queryRSAEngine(RSA_HANDLE& handle) {
-        handle = (RSA_HANDLE)(new(RSAEngine_MemPool) CryptoPP::InvertibleRSAFunction());
+    void queryRSAEnginePub(RSAPUB_HANDLE& handle, short PubExp, RSA_t& Module) {
+        CryptoPP::RSAFunction *Func = new(RSAEngine_MemPoolPub) CryptoPP::RSAFunction();
+        Func->Initialize
+        (
+            std::move(CryptoPP::Integer(Module, Module.getSize(), CryptoPP::Integer::UNSIGNED, CryptoPP::BIG_ENDIAN_ORDER)),
+            std::move(CryptoPP::Integer(3))
+        );
+        handle = (RSAPUB_HANDLE)(Func);
+    }
+    void queryRSAEnginePrv(RSAPRV_HANDLE& handle, short PubExp, RSA_t& Module, RSA_t& PrvKey) {
+        CryptoPP::InvertibleRSAFunction *Func = new(RSAEngine_MemPoolPrv) CryptoPP::InvertibleRSAFunction();
+        Func->Initialize
+        (
+            std::move(CryptoPP::Integer(Module, Module.getSize(), CryptoPP::Integer::UNSIGNED, CryptoPP::BIG_ENDIAN_ORDER)),
+            std::move(CryptoPP::Integer(3)),
+            std::move(CryptoPP::Integer(PrvKey, PrvKey.getSize(), CryptoPP::Integer::UNSIGNED, CryptoPP::BIG_ENDIAN_ORDER))
+            
+        );
+        handle = (RSAPRV_HANDLE)(Func);
     }
 
     // add a crypt target in a instance.
@@ -111,15 +132,9 @@ namespace CoinBill
     // and we are going to update the target buffer on it before we finalize it.
     //
     // note that you should call flush method before reusing it.
-    void querySHA256Update(SHA256_HANDLE& handle, void* pIn, size_t szIn) {
-        CryptoPP::SHA3_256* 
-            pEngine = (CryptoPP::SHA3_256*)handle;
-            pEngine->Update((uint8_t*)pIn, szIn);
-        // Add crypt target in engine.
-    }
-    void querySHA512Update(SHA512_HANDLE& handle, void* pIn, size_t szIn) {
-        CryptoPP::SHA3_512*
-            pEngine = (CryptoPP::SHA3_512*)handle;
+    void querySHAUpdate(CRYPT_HANDLE& handle, void* pIn, size_t szIn) {
+        CryptoPP::SHA3*
+            pEngine = (CryptoPP::SHA3*)handle;
             pEngine->Update((uint8_t*)pIn, szIn);
         // Add crypt target in engine.
     }
@@ -127,8 +142,8 @@ namespace CoinBill
     // finalize crypt instance.
     // we create a actaul hash here. out buffer should not be nullptr.
     void querySHA256Verify(SHA256_HANDLE& handle, SHA256_t& out) {
-        CryptoPP::SHA3_256*
-            pEngine = (CryptoPP::SHA3_256*)handle;
+        CryptoPP::SHA3*
+            pEngine = (CryptoPP::SHA3*)handle;
             pEngine->Final(out);
     }
     void querySHA512Verify(SHA512_HANDLE& handle, SHA512_t& out) {
@@ -175,20 +190,28 @@ namespace CoinBill
     
     // Encrypt, Decrypt functions.
     // basically, we use these functions for signing.
-    void queryRSAEncryptPub(RSA_HANDLE& handle, RSA_t& Key, void* pIn, size_t szIn) {
-        CryptoPP::InvertibleRSAFunction* pEngine = 
-            (CryptoPP::InvertibleRSAFunction*)handle;
+    void queryRSAEncrypt(RSA_HANDLE& handle, void* pOut, void* pIn, size_t szIn) {
+        CryptoPP::TrapdoorFunction* pEngine =
+            (CryptoPP::TrapdoorFunction*)handle;
+
+        CryptoPP::Integer Encrypted = pEngine->ApplyFunction
+        (
+            CryptoPP::Integer((const uint8_t*)pIn, szIn, CryptoPP::Integer::UNSIGNED, CryptoPP::BIG_ENDIAN_ORDER)
+        );
+
+        std::stringstream oBuf((char*)pOut);
+        oBuf << Encrypted;
     }
-    void queryRSADecrpytPub(RSA_HANDLE& handle, RSA_t& Key, void* pOut, size_t szOut) {
-        CryptoPP::InvertibleRSAFunction* pEngine =
-            (CryptoPP::InvertibleRSAFunction*)handle;
-    }
-    void queryRSAEncryptPrv(RSA_HANDLE& handle, RSA_t& Key, void* pIn, size_t szIn) {
-        CryptoPP::InvertibleRSAFunction* pEngine =
-            (CryptoPP::InvertibleRSAFunction*)handle;
-    }
-    void queryRSADecryptPrv(RSA_HANDLE& handle, RSA_t& Key, void* pOut, size_t szOut) {
-        CryptoPP::InvertibleRSAFunction* pEngine =
-            (CryptoPP::InvertibleRSAFunction*)handle;
+    void queryRSADecrypt(RSA_HANDLE& handle, void* pOut, void* pIn, size_t szIn) {
+        CryptoPP::TrapdoorFunctionInverse* pEngine =
+            (CryptoPP::TrapdoorFunctionInverse*)handle;
+
+        CryptoPP::Integer Round = pEngine->CalculateInverse
+        (
+            *RNG_Engine,
+            CryptoPP::Integer((const uint8_t*)pIn, szIn, CryptoPP::Integer::UNSIGNED, CryptoPP::BIG_ENDIAN_ORDER)
+        );
+
+        Round.Encode((uint8_t*)pOut, Round.ByteCount());
     }
 }
