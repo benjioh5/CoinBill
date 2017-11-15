@@ -43,6 +43,10 @@ namespace CoinBill
     void queryRSAEncrypt(RSA_HANDLE& handle, void* pOut, void* pIn, size_t szIn);
     void queryRSADecrypt(RSA_HANDLE& handle, void* pOut, void* pIn, size_t szIn);
 
+    template <class Ty>
+    void queryRSAEncrypt(RSA_HANDLE& handle, void* pOut, Ty* pIn) {
+        queryRSAEncrypt(handle, pOut, (void*)pIn, sizeof(Ty));
+    }
 
     // SHA-3 256 Hash Binding.
     //
@@ -61,6 +65,19 @@ namespace CoinBill
     // Update Function
     //
     void querySHAUpdate(CRYPT_HANDLE& handle, void* pIn, size_t szIn);
+
+    template <class Ty>
+    void querySHAUpdate(CRYPT_HANDLE& handle, Ty* pIn) {
+        querySHAUpdate(handle, (void*)pIn, sizeof(Ty));
+    }
+    template <class Ty>
+    void querySHAUpdate(CRYPT_HANDLE& handle, Ty& pIn) {
+        querySHAUpdate(handle, (void*)&pIn, sizeof(Ty));
+    }
+    template <class Ty, size_t size>
+    void querySHAUpdate(CRYPT_HANDLE& handle, Ty (&pIn)[size]) {
+        querySHAUpdate(handle, (void*)pIn, sizeof(Ty * size));
+    }
 
 };
 #endif // COINBILL_SUPPORT_ALGORITHM
